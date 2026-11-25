@@ -15,7 +15,7 @@ export default function LoginPage() {
     <AuthLayout title="Welcome back" description={`Sign in to the ${BRAND.unit} platform.`}>
       <LoginForm />
       {DEMO_MODE && (
-        <div className="mt-8">
+        <div className="mt-6">
           <DemoAccessPanel />
         </div>
       )}

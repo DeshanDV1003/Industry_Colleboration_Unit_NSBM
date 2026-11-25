@@ -18,7 +18,7 @@ export function DemoAccessPanel() {
         <span className="h-px flex-1 bg-line" />
       </div>
 
-      <div className="mt-4 grid grid-cols-2 gap-2.5">
+      <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
         {ROLES.map((role) => {
           const { icon: Icon, label } = ROLE_META[role]
           const pending = demoLogin.isPending && demoLogin.variables === role
@@ -29,11 +29,11 @@ export function DemoAccessPanel() {
               disabled={demoLogin.isPending}
               onClick={() => demoLogin.mutate(role, { onError: (e) => toast.error(getErrorMessage(e)) })}
               className={cn(
-                'flex items-center gap-2.5 rounded-control border border-line bg-surface px-3 py-2.5 text-left text-sm font-medium text-heading transition-colors',
+                'flex items-center gap-2 rounded-control border border-line bg-surface px-2.5 py-2 text-left text-[13px] font-medium leading-tight text-heading transition-colors',
                 'hover:border-primary hover:bg-primary-soft disabled:cursor-wait disabled:opacity-60',
               )}
             >
-              <span className="grid size-8 place-items-center rounded-lg bg-primary-soft text-primary">
+              <span className="grid size-7 shrink-0 place-items-center rounded-lg bg-primary-soft text-primary">
                 <Icon className={cn('size-4', pending && 'animate-pulse')} />
               </span>
               {label}
@@ -41,7 +41,7 @@ export function DemoAccessPanel() {
           )
         })}
       </div>
-      <p className="mt-3 text-center text-xs text-muted">Demo accounts use fictional data only.</p>
+      <p className="mt-2 text-center text-xs text-muted">Demo accounts use fictional data only.</p>
     </section>
   )
 }

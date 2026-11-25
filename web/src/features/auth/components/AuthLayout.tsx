@@ -22,8 +22,9 @@ export function AuthLayout({ title, description, children }: AuthLayoutProps) {
   const { theme, toggleTheme } = useThemeStore()
 
   return (
-    <div className="flex min-h-screen bg-page">
-      <aside className="relative hidden w-[46%] max-w-[680px] flex-col justify-between overflow-hidden bg-brand p-12 text-white lg:flex">
+    // Fixed to the window on desktop: the page itself never scrolls.
+    <div className="flex min-h-screen bg-page lg:h-screen lg:overflow-hidden">
+      <aside className="relative hidden w-[46%] max-w-[680px] flex-col justify-between overflow-hidden bg-brand p-10 text-white lg:flex">
         <div aria-hidden className="absolute -right-24 -top-24 size-96 rounded-full bg-white/10" />
         <div aria-hidden className="absolute -bottom-16 -left-20 size-72 rounded-full bg-white/5" />
 
@@ -57,7 +58,8 @@ export function AuthLayout({ title, description, children }: AuthLayoutProps) {
         </div>
       </aside>
 
-      <main className="relative flex flex-1 items-center justify-center px-6 py-12">
+      {/* On an unusually short window only this column scrolls, so nothing is cut off. */}
+      <main className="relative flex flex-1 overflow-y-auto px-6 py-4">
         <button
           onClick={toggleTheme}
           className="absolute right-6 top-6 grid size-10 place-items-center rounded-xl text-muted hover:bg-surface-subtle hover:text-heading"
@@ -66,17 +68,18 @@ export function AuthLayout({ title, description, children }: AuthLayoutProps) {
           {theme === 'light' ? <Moon className="size-5" /> : <Sun className="size-5" />}
         </button>
 
-        <div className="animate-enter w-full max-w-[420px]">
-          <div className="mb-8 lg:hidden">
+        {/* m-auto centres the form, and unlike items-center it never pushes the top out of reach when space is short. */}
+        <div className="animate-enter m-auto w-full max-w-[420px]">
+          <div className="mb-6 lg:hidden">
             <BrandLogo className="h-12" />
           </div>
 
           <h2 className="text-2xl font-bold">{title}</h2>
           <p className="mt-1.5 text-muted">{description}</p>
 
-          <div className="mt-8">{children}</div>
+          <div className="mt-6">{children}</div>
 
-          <p className="mt-10 text-center text-xs text-muted">{COPYRIGHT}</p>
+          <p className="mt-6 text-center text-xs text-muted">{COPYRIGHT}</p>
         </div>
       </main>
     </div>
