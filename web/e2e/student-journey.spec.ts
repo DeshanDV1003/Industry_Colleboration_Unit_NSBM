@@ -1,4 +1,8 @@
+import { resetDemoData } from './support/api'
 import { expect, test } from './support/fixtures'
+
+// A first-week student: earlier specs may have given the demo student a career path or baseline.
+test.beforeAll(resetDemoData)
 
 /** A first-week student: choose a path, take the baseline, tick the roadmap, try a task, see the streak. */
 test('student journey from career path to first industry task', async ({ page, signInAs }) => {
@@ -9,12 +13,15 @@ test('student journey from career path to first industry task', async ({ page, s
     await page.goto('/pathways')
     const card = page.locator('article, div').filter({ has: page.getByRole('heading', { name: 'Quality Assurance' }) }).last()
     await card.getByRole('button', { name: 'Choose this path' }).click()
-    await expect(page.getByRole('link', { name: /baseline/i }).first()).toBeVisible()
+    // Wait for the save itself; the sidebar always has a baseline link, so that proves nothing.
+    await expect(page.getByText('Career path saved.', { exact: false })).toBeVisible()
   })
 
   await test.step('answer every baseline question', async () => {
     await page.goto('/baseline')
-    const groups = page.getByRole('radiogroup')
+    // Each question is a <fieldset> of radios (role "group").
+    const groups = page.getByRole('main').getByRole('group').filter({ has: page.getByRole('radio') })
+    await expect(groups.first()).toBeVisible()
     const count = await groups.count()
     expect(count).toBeGreaterThan(0)
     for (let i = 0; i < count; i++) await groups.nth(i).getByRole('radio').first().check()

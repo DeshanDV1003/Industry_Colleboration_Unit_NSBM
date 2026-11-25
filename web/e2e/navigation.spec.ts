@@ -9,7 +9,7 @@ const PORTALS: AccountKey[] = ['student', 'lecturer', 'partner', 'admin', 'regis
 
 for (const account of PORTALS) {
   test(`every ${account} page opens cleanly`, async ({ page, signInAs, expectNoCrash }) => {
-    test.setTimeout(120_000)
+    test.setTimeout(240_000)
     const consoleErrors: string[] = []
     page.on('console', (m) => { if (m.type() === 'error' && !/camera|getUserMedia/i.test(m.text())) consoleErrors.push(m.text()) })
 

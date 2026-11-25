@@ -12,7 +12,7 @@ test('AI interviewer page explains its state and needs consent', async ({ page, 
 
   if (!isAvailable) {
     await expect(page.getByText('The AI interviewer is not set up yet')).toBeVisible()
-    await expect(page.getByRole('link', { name: /Soft-skills practice/ })).toBeVisible()
+    await expect(page.getByRole('main').getByRole('link', { name: /Soft-skills practice/ })).toBeVisible()
     return
   }
   const start = page.getByRole('button', { name: 'Start interview' })

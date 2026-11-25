@@ -1,4 +1,8 @@
+import { resetDemoData } from './support/api'
 import { expect, test } from './support/fixtures'
+
+// Starts from the seed: earlier specs may have registered the student or formed teams.
+test.beforeAll(resetDemoData)
 
 test.describe('Events, teams and certificates', () => {
   test('student registers for a hackathon and starts a team', async ({ page, signInAs }) => {
@@ -7,10 +11,15 @@ test.describe('Events, teams and certificates', () => {
     await page.getByRole('link', { name: /Green Hack 48/ }).click()
     await page.getByRole('button', { name: 'Register', exact: true }).click()
     await expect(page.getByText('You are registered').first()).toBeVisible()
-
-    await page.getByLabel('New team name').fill('E2E Builders')
-    await page.getByRole('button', { name: 'Create' }).click()
-    await expect(page.getByText('E2E Builders').first()).toBeVisible()
+    // Registering refreshes the event and can re-render the team form while typing, so retry until the team shows.
+    await expect(async () => {
+      const name = page.getByLabel('New team name')
+      if (await name.isVisible()) {
+        await name.fill('E2E Builders')
+        await page.getByRole('button', { name: 'Create' }).click()
+      }
+      await expect(page.getByText('E2E Builders').first()).toBeVisible({ timeout: 3_000 })
+    }).toPass({ timeout: 20_000 })
     await expect(page.getByText('(you)')).toBeVisible()
     await expect(page.locator('code').filter({ hasText: /^[A-Z2-9]{6}$/ })).toBeVisible()
   })

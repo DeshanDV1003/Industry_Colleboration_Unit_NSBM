@@ -13,8 +13,9 @@ export default defineConfig({
   fullyParallel: false,
   workers: 1,
   retries: process.env.CI ? 1 : 0,
-  timeout: 45_000,
-  expect: { timeout: 10_000 },
+  timeout: 60_000,
+  // Generous: the Vite dev server compiles each route on first visit.
+  expect: { timeout: 15_000 },
   reporter: [['list'], ['html', { outputFolder: 'e2e-report', open: 'never' }]],
   use: {
     baseURL: WEB_URL,
@@ -33,10 +34,12 @@ export default defineConfig({
       timeout: 180_000,
     },
     {
-      command: 'npm run dev',
+      // A production build: the dev server re-bundles dependencies on first visits and reloads mid-test.
+      // Preview reuses the dev proxy settings, so /api still reaches the API.
+      command: 'npm run build && npx vite preview --port 5301 --strictPort',
       url: WEB_URL,
       reuseExistingServer: true,
-      timeout: 60_000,
+      timeout: 180_000,
     },
   ],
 })
