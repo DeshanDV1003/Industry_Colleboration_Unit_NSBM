@@ -56,6 +56,7 @@ const ResearchPage = lazy(() => import('@/features/research/pages/ResearchPage')
 const SettingsPage = lazy(() => import('@/features/settings/pages/SettingsPage'))
 const HallBookingsPage = lazy(() => import('@/features/venues/pages/HallBookingsPage'))
 const VenuesPage = lazy(() => import('@/features/venues/pages/VenuesPage'))
+const AnalyticsPage = lazy(() => import('@/features/analytics/pages/AnalyticsPage'))
 const ReportsPage = lazy(() => import('@/features/reports/pages/ReportsPage'))
 const AuditLogPage = lazy(() => import('@/features/audit/pages/AuditLogPage'))
 const MySettingsPage = lazy(() => import('@/features/my-settings/pages/MySettingsPage'))
@@ -180,7 +181,10 @@ export const router = createBrowserRouter([
           },
           {
             element: <RequireRole roles={['Lecturer', 'Admin']} />,
-            children: [{ path: '/research', element: <ResearchPage /> }],
+            children: [
+              { path: '/research', element: <ResearchPage /> },
+              { path: '/analytics', element: <AnalyticsPage /> },
+            ],
           },
           {
             // Each report checks its own roles; the page lists only the reports the role may run.

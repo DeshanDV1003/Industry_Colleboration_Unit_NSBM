@@ -9,6 +9,14 @@
 :root,
 [data-theme='light'] {
   --color-primary: #0b5cad;          /* NSBM Blue 600 */
+  /* Data visualisation (validated: categorical order passes CVD and normal-vision checks on the card surface). */
+  --viz-single: #0b7a43;             /* one-series charts: NSBM green, 5.4:1 on the card */
+  --viz-1: #2a78d6;
+  --viz-2: #eb6834;
+  --viz-3: #1baf7a;
+  --viz-4: #eda100;
+  --viz-5: #e87ba4;
+  --viz-grid: #e7edf4;
   --color-primary-hover: #0a4a8c;    /* NSBM Blue 700 */
   --color-primary-soft: #eef6ff;     /* NSBM Blue 50  */
   --color-accent: #168550;           /* NSBM Green 600 */
@@ -50,6 +58,14 @@
 
 [data-theme='dark'] {
   --color-primary: #4891ee;          /* NSBM Blue 400 */
+  /* Data visualisation: the same hues stepped for the dark card, not an automatic flip. */
+  --viz-single: #2fa866;             /* 5.3:1 on the dark card */
+  --viz-1: #3987e5;
+  --viz-2: #d95926;
+  --viz-3: #199e70;
+  --viz-4: #c98500;
+  --viz-5: #d55181;
+  --viz-grid: #22303f;
   --color-primary-hover: #7fb5f7;    /* NSBM Blue 300 */
   --color-primary-soft: rgb(72 145 238 / 0.14);
   --color-accent: #3bbf7a;           /* NSBM Green 400 */

@@ -157,6 +157,7 @@ READS = {
     "/reports/student-participation": {"Admin", "Lecturer"},
     "/audit": {"Admin"},
     "/me/email-preferences": ALL_ROLES,
+    "/analytics": {"Admin", "Lecturer"},
 }
 for path, allowed in READS.items():
     for role, token in ROLE_TOKENS.items():
@@ -957,6 +958,27 @@ if link:
     check("reset recorded in the audit log by the person themself",
           any(e["action"] == "user.password-reset-by-link" and e["actorName"] == "Tharindu Silva" and e["actorRole"] == "Student"
               for e in call("GET", "/audit?search=reset-by-link", adm)[1]["items"]))
+
+# ---------------------------------------------------------------- M22 analytics
+section("M22 Analytics (aggregates only)")
+an = expect("analytics, 12 weeks", call("GET", "/analytics?weeks=12", adm), 200)
+check("one point per week, oldest first, ending this week", len(an["activity"]) == 12 and an["activity"][-1]["weekStart"] <= TODAY.isoformat()
+      and [w["weekStart"] for w in an["activity"]] == sorted(w["weekStart"] for w in an["activity"]))
+check("weeks start on Monday", all(datetime.date.fromisoformat(w["weekStart"]).weekday() == 0 for w in an["activity"]))
+check("headline counts are consistent", an["students"] >= 5 and 0 <= an["activeStudentsInPeriod"] <= an["students"]
+      and an["applicationsInPeriod"] == sum(w["applications"] for w in an["activity"]), {k: v for k, v in an.items() if not isinstance(v, list)})
+check("pipeline totals add up per company", an["pipeline"] and all(p["total"] == p["submitted"] + p["underReview"] + p["shortlisted"] + p["interviewInvited"] + p["notSelected"] for p in an["pipeline"]))
+check("pipeline covers every application in the period", sum(p["total"] for p in an["pipeline"]) == an["applicationsInPeriod"])
+check("hall use over teaching hours of the next four weeks", an["halls"] and all(0 <= h["bookedHours"] <= h["availableHours"] for h in an["halls"]) and an["upcomingHallWeeks"] == 4)
+check("seeded lectures show as booked hours", sum(h["bookedHours"] for h in an["halls"]) > 0)
+check("events list registrations and attendance", all(e["attended"] is None or e["attended"] <= e["registered"] for e in an["events"]))
+small = [r for r in an["readiness"] if r["students"] < an["minGroupSize"]]
+check("groups smaller than the privacy minimum show only a head count",
+      an["minGroupSize"] == 3 and all(r["baselineTaken"] is None and r["averageRoadmapPercent"] is None for r in small), small)
+check("small events hide their attendance", all(e["attended"] is None for e in an["events"] if e["registered"] < an["minGroupSize"]))
+check("no student is named anywhere in analytics", not any(n in json.dumps(an) for n in ["Sahan", "Kavindi", "Tharindu", "Amaya", "Ravindu", "DEMO-00"]))
+expect("period must be 4 to 52 weeks", call("GET", "/analytics?weeks=2", adm), 400)
+check("lecturers see the same aggregates", call("GET", "/analytics?weeks=12", lec)[1]["students"] == an["students"])
 
 # ---------------------------------------------------------------- restore
 section("Restore")

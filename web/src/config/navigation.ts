@@ -1,5 +1,5 @@
 import {
-  Award, BadgeCheck, FileBarChart, ScrollText, Building2, CalendarClock, Megaphone, BarChart3, Bot, Inbox, Trophy, CalendarDays, CalendarHeart, BookOpenCheck, Briefcase, CalendarCheck, ClipboardCheck, Compass, FileText, FolderKanban,
+  Award, BadgeCheck, FileBarChart, LineChart, ScrollText, Building2, CalendarClock, Megaphone, BarChart3, Bot, Inbox, Trophy, CalendarDays, CalendarHeart, BookOpenCheck, Briefcase, CalendarCheck, ClipboardCheck, Compass, FileText, FolderKanban,
   Gauge, LayoutDashboard, ListChecks, Map, MessagesSquare, Mic, NotebookPen, Settings, ShieldCheck, Target,
   UserCog, UserSearch, Users, Wrench, type LucideIcon,
 } from 'lucide-react'
@@ -20,6 +20,7 @@ export interface NavSection {
 
 const overview: NavItem = { label: 'Overview', to: '/dashboard', icon: LayoutDashboard, ready: true }
 const calendar: NavItem = { label: 'Year calendar', to: '/calendar', icon: CalendarDays, ready: true }
+const analytics: NavItem = { label: 'Analytics', to: '/analytics', icon: LineChart, ready: true }
 const reports: NavItem = { label: 'Reports', to: '/reports', icon: FileBarChart, ready: true }
 
 /** Sidebar menu per portal. Paths follow the IndustryReady feature guide. */
@@ -77,7 +78,7 @@ export const NAVIGATION: Record<Role, NavSection[]> = {
     },
     {
       title: 'Research',
-      items: [{ label: 'Research analytics', to: '/research', icon: BarChart3, ready: true }, reports],
+      items: [analytics, { label: 'Research analytics', to: '/research', icon: BarChart3, ready: true }, reports],
     },
   ],
   Industry: [
@@ -110,6 +111,7 @@ export const NAVIGATION: Record<Role, NavSection[]> = {
         { label: 'Announcements', to: '/announcements', icon: Megaphone, ready: true },
         { label: 'Hall allocations', to: '/hall-bookings', icon: CalendarClock, ready: true },
         { label: 'Partner enquiries', to: '/partner-enquiries', icon: Inbox, ready: true },
+        analytics,
         reports,
         { label: 'Audit log', to: '/audit', icon: ScrollText, ready: true },
         { label: 'Research overview', to: '/research', icon: BarChart3, ready: true },
