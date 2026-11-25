@@ -11,6 +11,7 @@ public static class AuditActions
     public const string UserReactivated = "user.reactivated";
     public const string PasswordReset = "user.password-reset";
     public const string PasswordChanged = "user.password-changed";
+    public const string PasswordResetByLink = "user.password-reset-by-link";
     public const string StudentsImported = "user.students-imported";
 
     public const string TaskReviewed = "task.reviewed";

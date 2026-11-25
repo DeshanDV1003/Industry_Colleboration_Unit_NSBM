@@ -72,6 +72,10 @@ public static class DependencyInjection
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
         services.Configure<DemoOptions>(configuration.GetSection(DemoOptions.SectionName));
         services.Configure<BootstrapOptions>(configuration.GetSection(BootstrapOptions.SectionName));
+        services.Configure<PasswordResetOptions>(configuration.GetSection(PasswordResetOptions.SectionName));
+        // Reset tokens (e-mailed links and admin resets) expire; they are also single-use through the security stamp.
+        services.Configure<DataProtectionTokenProviderOptions>(options => options.TokenLifespan =
+            TimeSpan.FromMinutes(configuration.GetValue(PasswordResetOptions.SectionName + ":" + nameof(PasswordResetOptions.LinkValidMinutes), 60)));
 
         services.AddIdentityCore<ApplicationUser>(options =>
             {
@@ -104,5 +108,10 @@ public static class DependencyInjection
         }
 
         services.AddHostedService<EmailDispatcher>();
+
+        // One instance is both the queue the handlers write to and the background service that empties it.
+        services.AddSingleton<PasswordResetMailer>();
+        services.AddSingleton<IPasswordResetMailer>(sp => sp.GetRequiredService<PasswordResetMailer>());
+        services.AddHostedService(sp => sp.GetRequiredService<PasswordResetMailer>());
     }
 }

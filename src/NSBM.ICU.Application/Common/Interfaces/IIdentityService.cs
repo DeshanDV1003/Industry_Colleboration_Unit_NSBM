@@ -34,6 +34,15 @@ public interface IIdentityService
     /// <summary>An administrator sets a new password without knowing the old one.</summary>
     Task ResetPasswordAsync(string userId, string newPassword, CancellationToken cancellationToken);
 
+    /// <summary>
+    /// A single-use reset token for an active account, or <c>null</c> when there is no such account (the caller must
+    /// answer the same either way). The token is valid for a limited time and dies with any password change.
+    /// </summary>
+    Task<PasswordResetTicket?> CreatePasswordResetAsync(string email, CancellationToken cancellationToken);
+
+    /// <summary>Sets a new password with a reset token. Returns the user id; a bad, used or expired token fails on "Token".</summary>
+    Task<string> ResetPasswordWithTokenAsync(string email, string token, string newPassword, CancellationToken cancellationToken);
+
     /// <summary>The account holder changes their own password; the current one must be right.</summary>
     Task ChangePasswordAsync(string userId, string currentPassword, string newPassword, CancellationToken cancellationToken);
 }

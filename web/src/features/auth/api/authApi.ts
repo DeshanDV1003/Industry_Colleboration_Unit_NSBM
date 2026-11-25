@@ -14,6 +14,9 @@ const authApi = {
   demoLogin: (role: Role) => http.post<AuthResponse>('/auth/demo-login', { role }).then((r) => r.data),
   me: () => http.get<CurrentUser>('/auth/me').then((r) => r.data),
   changePassword: (body: { currentPassword: string; newPassword: string }) => http.post('/auth/change-password', body),
+  passwordResetAvailability: () => http.get<{ available: boolean; linkValidMinutes: number }>('/auth/password-reset').then((r) => r.data),
+  forgotPassword: (email: string) => http.post('/auth/forgot-password', { email }),
+  resetPassword: (body: { email: string; token: string; newPassword: string }) => http.post('/auth/reset-password', body),
 }
 
 /** Stores the new session, drops every cached query from a previous account and opens the dashboard. */
@@ -63,4 +66,16 @@ export function useSignOut() {
 
 export function useChangePassword() {
   return useMutation({ mutationFn: authApi.changePassword })
+}
+
+export function usePasswordResetAvailability() {
+  return useQuery({ queryKey: ['auth', 'password-reset'], queryFn: authApi.passwordResetAvailability, staleTime: Infinity })
+}
+
+export function useForgotPassword() {
+  return useMutation({ mutationFn: authApi.forgotPassword })
+}
+
+export function useResetForgottenPassword() {
+  return useMutation({ mutationFn: authApi.resetPassword })
 }

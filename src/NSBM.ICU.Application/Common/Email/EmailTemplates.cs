@@ -32,6 +32,25 @@ public static class EmailTemplates
             "You receive this weekly summary because it is on. Change this under My settings.");
     }
 
+    /// <summary>
+    /// The reset link. Unlike other e-mails, the link carries a secret, so it is built here from the trusted base URL
+    /// and never stored as a notification.
+    /// </summary>
+    public static EmailMessage PasswordReset(string to, string name, string resetUrl, int validMinutes)
+    {
+        string E(string value) => WebUtility.HtmlEncode(value);
+        var text = $"Hello {name},\n\nSomeone asked to reset the password for your {Unit} account.\n\n" +
+                   $"Choose a new password here (the link works once, for {validMinutes} minutes):\n{resetUrl}\n\n" +
+                   "If you did not ask for this, ignore this e-mail: your password stays the same.\n\n" + Unit;
+        var html = "<div style=\"font-family:Segoe UI,Arial,sans-serif;max-width:560px;color:#1f2937\">" +
+                   $"<div style=\"background:{Green};color:#fff;padding:14px 18px;font-weight:600\">{E(Unit)}</div><div style=\"padding:18px\">" +
+                   $"<p>Hello {E(name)},</p><p>Someone asked to reset the password for your account.</p>" +
+                   $"<p><a href=\"{E(resetUrl)}\" style=\"display:inline-block;background:{Green};color:#fff;padding:8px 14px;border-radius:6px;text-decoration:none\">Choose a new password</a></p>" +
+                   $"<p style=\"font-size:13px;color:#4b5563\">The link works once, for {validMinutes} minutes. If you did not ask for this, ignore this e-mail: your password stays the same.</p>" +
+                   "</div></div>";
+        return new EmailMessage(to, name, "Reset your password", text, html);
+    }
+
     public static EmailMessage Test(string to, string name, string appBaseUrl) =>
         Build(to, name, "Test e-mail from the Industry Collaboration Unit",
             "E-mail delivery is working. This message was sent from the platform's settings page.", [], appBaseUrl, null);

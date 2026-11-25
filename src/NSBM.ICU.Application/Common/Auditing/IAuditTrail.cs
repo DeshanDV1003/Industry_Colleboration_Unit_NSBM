@@ -11,4 +11,8 @@ public interface IAuditTrail
 {
     Task RecordAsync(AuditCategory category, string action, string summary, string? subjectType = null, string? subjectId = null,
         CancellationToken cancellationToken = default);
+
+    /// <summary>For actions taken while signed out (a forgotten-password reset): the account that acted is named explicitly.</summary>
+    Task RecordForAsync(string actorUserId, AuditCategory category, string action, string summary, string? subjectType = null,
+        string? subjectId = null, CancellationToken cancellationToken = default);
 }

@@ -38,6 +38,25 @@ public sealed class PeopleSeeder(ApplicationDbContext db, UserManager<Applicatio
         .. Cohort.Select(c => CohortEmail(c.StudentNo)),
     ];
 
+    /// <summary>
+    /// Puts every seeded account's password back to its demo value (after tests or people changed them). Changing a
+    /// password also refreshes the security stamp, so any reset link for these accounts stops working.
+    /// </summary>
+    public async Task RestorePasswordsAsync()
+    {
+        var accounts = DemoAccounts.All.Select(a => (a.Email, a.Password))
+            .Append((SerendibPartnerEmail, PartnerPassword)).Append((QualityFirstPartnerEmail, PartnerPassword))
+            .Concat(Cohort.Select(c => (CohortEmail(c.StudentNo), CohortPassword)));
+
+        foreach (var (email, password) in accounts)
+        {
+            if (await users.FindByEmailAsync(email) is not { } user || await users.CheckPasswordAsync(user, password))
+                continue;
+            await users.RemovePasswordAsync(user);
+            await users.AddPasswordAsync(user, password);
+        }
+    }
+
     private static string CohortEmail(string studentNo) => $"{studentNo.ToLowerInvariant()}@nsbm.demo";
 
     private const string Department = "Department of Software Engineering and Computer Security";

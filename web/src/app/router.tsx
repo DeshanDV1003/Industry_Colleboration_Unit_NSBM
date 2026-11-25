@@ -5,6 +5,8 @@ import { RequireAuth, RequireRole } from './guards'
 import { AppShell } from './layout/AppShell'
 
 const LoginPage = lazy(() => import('@/features/auth/pages/LoginPage'))
+const ForgotPasswordPage = lazy(() => import('@/features/auth/pages/ForgotPasswordPage'))
+const ResetPasswordPage = lazy(() => import('@/features/auth/pages/ResetPasswordPage'))
 const DashboardPage = lazy(() => import('@/features/dashboard/pages/DashboardPage'))
 const CalendarPage = lazy(() => import('@/features/calendar/pages/CalendarPage'))
 const NotificationsPage = lazy(() => import('@/features/notifications/pages/NotificationsPage'))
@@ -66,6 +68,23 @@ export const router = createBrowserRouter([
     element: (
       <Suspense fallback={<PageSpinner />}>
         <LoginPage />
+      </Suspense>
+    ),
+  },
+  {
+    // Public: asking for a reset link, and the page the e-mailed link opens.
+    path: '/forgot-password',
+    element: (
+      <Suspense fallback={<PageSpinner />}>
+        <ForgotPasswordPage />
+      </Suspense>
+    ),
+  },
+  {
+    path: '/reset-password',
+    element: (
+      <Suspense fallback={<PageSpinner />}>
+        <ResetPasswordPage />
       </Suspense>
     ),
   },

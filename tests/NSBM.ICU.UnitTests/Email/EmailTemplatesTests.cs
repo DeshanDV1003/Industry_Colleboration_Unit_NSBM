@@ -47,6 +47,18 @@ public sealed class EmailTemplatesTests
     }
 
     [Fact]
+    public void Reset_email_carries_the_link_and_says_how_long_it_works()
+    {
+        const string url = "https://icu.nsbm.ac.lk/reset-password?email=a%40x.lk&token=abc_123";
+        var mail = EmailTemplates.PasswordReset("a@x.lk", "Amaya", url, 60);
+        Assert.Equal("Reset your password", mail.Subject);
+        Assert.Contains(url, mail.TextBody);
+        Assert.Contains("60 minutes", mail.TextBody);
+        Assert.Contains("ignore this e-mail", mail.TextBody);
+        Assert.Contains("href=\"https://icu.nsbm.ac.lk/reset-password?email=a%40x.lk&amp;token=abc_123\"", mail.HtmlBody);
+    }
+
+    [Fact]
     public void Digest_says_when_there_is_nothing_new() =>
         Assert.Contains("all caught up", EmailTemplates.WeeklyDigest("a@x.lk", "Sahan", [], BaseUrl).TextBody);
 

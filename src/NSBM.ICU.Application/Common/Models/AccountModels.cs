@@ -5,3 +5,6 @@ public sealed record NewAccount(string Role, string Email, string FirstName, str
 
 /// <summary>The identity facts an administrator sees for an account.</summary>
 public sealed record AccountStatus(string UserId, string Email, string Role, bool IsActive);
+
+/// <summary>What is needed to e-mail a password-reset link. The token is URL-safe and must only ever be sent to <see cref="Email"/>.</summary>
+public sealed record PasswordResetTicket(string UserId, string Email, string FullName, string Token);

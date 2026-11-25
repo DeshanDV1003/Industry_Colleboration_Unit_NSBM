@@ -65,6 +65,7 @@ import zipfile
 import email
 import email.policy
 import pathlib
+import re
 for _ in range(60):  # wait for a freshly started API
     try:
         if call("GET", "/skills")[0] == 401:
@@ -925,11 +926,44 @@ check("test e-mail goes to the admin", sent["sentTo"] == "icu.head@nsbm.demo" an
       any("Test e-mail" in m["subject"] for m in inbox("icu.head@nsbm.demo", since=seen)))
 expect("only admins send test e-mails", call("POST", "/settings/test-email", reg), 403)
 
+# ---------------------------------------------------------------- M21 forgot password
+section("M21 Forgot password (e-mailed single-use link)")
+seen = {p.name for p in MAIL_DIR.glob("*.eml")} if MAIL_DIR.exists() else set()
+avail = expect("reset availability (no sign-in)", call("GET", "/auth/password-reset"), 200)
+check("reset by e-mail available, link valid 60 minutes", avail == {"available": True, "linkValidMinutes": 60}, avail)
+
+nobody = f"nobody{run}@nsbm.demo"
+expect("unknown address gets the same answer", call("POST", "/auth/forgot-password", body={"email": nobody}), 202)
+expect("known address", call("POST", "/auth/forgot-password", body={"email": "demo-003@nsbm.demo"}), 202)
+reset_mail = wait_for("demo-003@nsbm.demo", seen, lambda m: m["subject"] == "Reset your password")
+check("reset e-mail delivered", reset_mail)
+check("no e-mail for an address without an account", not inbox(nobody, since=seen))
+link = re.search(r"http://localhost:5301/reset-password\?email=([^&\s]+)&token=([A-Za-z0-9_\-]+)", reset_mail[0]["text"]) if reset_mail else None
+check("link points at the web app with e-mail and token", link, reset_mail[0]["text"][:400] if reset_mail else "")
+check("token never appears in the in-app notifications", link and not any(link.group(2) in n["body"] for n in call("GET", "/me/notifications", login("demo-003@nsbm.demo", "Student@123"))[1]["items"]))
+
+if link:
+    email_param, token = urllib.parse.unquote(link.group(1)), link.group(2)
+    s_, b_ = call("POST", "/auth/reset-password", body={"email": email_param, "token": token[:-4] + "AAAA", "newPassword": "Forgotten9"})
+    check("tampered token refused on the Token field", s_ == 400 and "Token" in b_.get("errors", {}), (s_, b_))
+    s_, b_ = call("POST", "/auth/reset-password", body={"email": email_param, "token": token, "newPassword": "short"})
+    check("weak password refused on its field", s_ == 400 and "NewPassword" in b_.get("errors", {}), (s_, b_))
+    expect("reset with the link", call("POST", "/auth/reset-password", body={"email": email_param, "token": token, "newPassword": "Forgotten9"}), 204)
+    tharindu = login("demo-003@nsbm.demo", "Forgotten9")
+    check("old password no longer works", call("POST", "/auth/login", body={"email": "demo-003@nsbm.demo", "password": "Student@123"})[0] == 401)
+    s_, b_ = call("POST", "/auth/reset-password", body={"email": email_param, "token": token, "newPassword": "Another9pass"})
+    check("the link works only once", s_ == 400 and "already used" in str(b_), (s_, b_))
+    check("security alert after the reset", any(n["kind"] == "AccountSecurity" and "reset link" in n["body"] for n in call("GET", "/me/notifications", tharindu)[1]["items"]))
+    check("reset recorded in the audit log by the person themself",
+          any(e["action"] == "user.password-reset-by-link" and e["actorName"] == "Tharindu Silva" and e["actorRole"] == "Student"
+              for e in call("GET", "/audit?search=reset-by-link", adm)[1]["items"]))
+
 # ---------------------------------------------------------------- restore
 section("Restore")
 expect("final demo reset", call("POST", "/settings/demo-reset", adm), 204)
 check("demo reset keeps the audit log", call("GET", "/audit", adm)[1]["total"] > log["total"])
 check("demo reset restores default e-mail choices", call("GET", "/me/email-preferences", kav)[1]["notificationsByEmail"] is True)
+check("demo reset restores demo passwords", call("POST", "/auth/login", body={"email": "demo-003@nsbm.demo", "password": "Student@123"})[0] == 200)
 after_reset = call("GET", "/users", adm)[1]
 check("reset leaves only the seeded, active accounts", len(after_reset) == 11 and all(u["isActive"] for u in after_reset), [u["email"] for u in after_reset])
 

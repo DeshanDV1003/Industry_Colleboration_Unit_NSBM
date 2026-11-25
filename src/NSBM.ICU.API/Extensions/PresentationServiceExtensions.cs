@@ -19,6 +19,7 @@ public static class PresentationServiceExtensions
     public const string WebClientCorsPolicy = "WebClient";
     public const string PublicFormsRateLimit = "PublicForms";
     public const string ReadyTag = "ready";
+    public const string PasswordResetRateLimit = "PasswordReset";
 
     public static IServiceCollection AddPresentation(this IServiceCollection services, IConfiguration configuration)
     {
@@ -95,6 +96,11 @@ public static class PresentationServiceExtensions
             options.AddPolicy(PublicFormsRateLimit, context => RateLimitPartition.GetFixedWindowLimiter(
                 context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
                 _ => new FixedWindowRateLimiterOptions { PermitLimit = 5, Window = TimeSpan.FromMinutes(1), QueueLimit = 0 }));
+
+            // Forgot/reset password: enough for a person who mistypes, too few to guess tokens or flood inboxes.
+            options.AddPolicy(PasswordResetRateLimit, context => RateLimitPartition.GetFixedWindowLimiter(
+                context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                _ => new FixedWindowRateLimiterOptions { PermitLimit = 10, Window = TimeSpan.FromMinutes(5), QueueLimit = 0 }));
         });
 
     private static void AddSwagger(this IServiceCollection services)

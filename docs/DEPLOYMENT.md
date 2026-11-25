@@ -33,6 +33,7 @@ origin is configured.
 | `Email__Mode` | no (default `Off`) | `Smtp` to send e-mail. Notifications always stay in the app. |
 | `Email__AppBaseUrl` | with e-mail | The public address of the web app; every link in an e-mail starts with it. |
 | `Email__FromAddress`, `Email__FromName` | with e-mail | The sender people see. Use an address your mail server may send as. |
+| `PasswordReset__LinkValidMinutes` | no (default 60) | How long an e-mailed reset link works. "Forgot password?" needs e-mail to be on; without it the page tells people to ask the Unit. |
 | `Email__Smtp__Host`, `__Port`, `__Username`, `__Password`, `__Security` | with e-mail | The SMTP relay (e.g. the university's). `Security`: `StartTls` (587, default), `SslOnConnect` (465) or `None`. |
 
 The web build reads `VITE_DEMO_MODE` (default `false` for production builds) and `VITE_FACE_MODEL_URL`

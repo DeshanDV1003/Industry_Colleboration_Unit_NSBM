@@ -13,14 +13,29 @@ public sealed class AuditTrail(ApplicationDbContext db, ICurrentUser currentUser
     private string? _actorName;
 
     public async Task RecordAsync(AuditCategory category, string action, string summary, string? subjectType = null, string? subjectId = null,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default) =>
+        Add(currentUser.UserId, await ActorNameAsync(cancellationToken), currentUser.Role, category, action, summary, subjectType, subjectId);
+
+    public async Task RecordForAsync(string actorUserId, AuditCategory category, string action, string summary, string? subjectType = null,
+        string? subjectId = null, CancellationToken cancellationToken = default)
+    {
+        var name = await db.Users.Where(u => u.Id == actorUserId).Select(u => u.FirstName + " " + u.LastName).FirstOrDefaultAsync(cancellationToken);
+        var role = await (from userRole in db.UserRoles
+                          join r in db.Roles on userRole.RoleId equals r.Id
+                          where userRole.UserId == actorUserId
+                          select r.Name).FirstOrDefaultAsync(cancellationToken);
+        Add(actorUserId, string.IsNullOrWhiteSpace(name) ? "Unknown" : name.Trim(), role, category, action, summary, subjectType, subjectId);
+    }
+
+    private void Add(string? actorUserId, string actorName, string? actorRole, AuditCategory category, string action, string summary,
+        string? subjectType, string? subjectId)
     {
         db.AuditEntries.Add(new AuditEntry
         {
             At = clock.UtcNow,
-            ActorUserId = currentUser.UserId,
-            ActorName = await ActorNameAsync(cancellationToken),
-            ActorRole = currentUser.Role,
+            ActorUserId = actorUserId,
+            ActorName = actorName,
+            ActorRole = actorRole,
             Category = category,
             Action = action,
             Summary = summary.Length <= 500 ? summary : summary[..499] + "…",

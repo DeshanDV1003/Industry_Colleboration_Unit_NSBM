@@ -9,7 +9,7 @@ namespace NSBM.ICU.Infrastructure.Services;
 
 /// <summary>
 /// Clears every activity and partner-content table (children before parents), resets student choices and
-/// re-runs the content seeders. Companies and the catalogue are kept; seeded accounts are reactivated, other accounts removed, and venues return to the seeded list.
+/// re-runs the content seeders. Companies and the catalogue are kept; seeded accounts are reactivated with their demo passwords, other accounts removed, and venues return to the seeded list.
 /// </summary>
 public sealed class DemoDataService(
     ApplicationDbContext db,
@@ -20,7 +20,8 @@ public sealed class DemoDataService(
     EventSeeder events,
     AchievementSeeder achievements,
     CalendarSeeder calendar,
-    VenueSeeder venues) : IDemoDataService
+    VenueSeeder venues,
+    PeopleSeeder people) : IDemoDataService
 {
     public bool IsEnabled => options.Value.Enabled;
 
@@ -79,5 +80,6 @@ public sealed class DemoDataService(
         await db.MarkSeededNotificationsEmailedAsync(ct);
 
         await transaction.CommitAsync(ct);
+        await people.RestorePasswordsAsync();
     }
 }

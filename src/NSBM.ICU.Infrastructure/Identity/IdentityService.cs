@@ -1,5 +1,7 @@
+using System.Text;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using NSBM.ICU.Application.Common.Exceptions;
@@ -97,6 +99,37 @@ public sealed class IdentityService(UserManager<ApplicationUser> users, Applicat
         var user = await RequireAsync(userId);
         var token = await users.GeneratePasswordResetTokenAsync(user);
         Ensure(await users.ResetPasswordAsync(user, token, newPassword), "NewPassword");
+    }
+
+    private const string InvalidLink = "This link has expired or was already used. Ask for a new one.";
+
+    public async Task<PasswordResetTicket?> CreatePasswordResetAsync(string email, CancellationToken cancellationToken)
+    {
+        var user = await users.FindByEmailAsync(email);
+        if (user is not { IsActive: true }) return null;
+
+        var token = await users.GeneratePasswordResetTokenAsync(user);
+        return new PasswordResetTicket(user.Id, user.Email!, user.FullName, WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token)));
+    }
+
+    public async Task<string> ResetPasswordWithTokenAsync(string email, string token, string newPassword, CancellationToken cancellationToken)
+    {
+        // Unknown address, inactive account and bad token all get the same answer, so the form reveals nothing.
+        var user = await users.FindByEmailAsync(email);
+        if (user is not { IsActive: true } || DecodeToken(token) is not { } decoded)
+            throw new ValidationException([new ValidationFailure("Token", InvalidLink)]);
+
+        var result = await users.ResetPasswordAsync(user, decoded, newPassword);
+        if (result.Errors.Any(e => e.Code == "InvalidToken"))
+            throw new ValidationException([new ValidationFailure("Token", InvalidLink)]);
+        Ensure(result, "NewPassword");
+        return user.Id;
+    }
+
+    private static string? DecodeToken(string token)
+    {
+        try { return Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(token)); }
+        catch (FormatException) { return null; }
     }
 
     public async Task ChangePasswordAsync(string userId, string currentPassword, string newPassword, CancellationToken cancellationToken)
