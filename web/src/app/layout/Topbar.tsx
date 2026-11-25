@@ -15,7 +15,7 @@ export function Topbar() {
   const { toggleSidebar, setMobileNavOpen } = useUiStore()
 
   return (
-    <header className="sticky top-0 z-30 flex h-[72px] items-center gap-3 border-b border-line bg-surface px-4 lg:px-8">
+    <header className="sticky top-0 z-30 flex print:hidden h-[72px] items-center gap-3 border-b border-line bg-surface px-4 lg:px-8">
       <button className={`${iconButton} lg:hidden`} onClick={() => setMobileNavOpen(true)} aria-label="Open navigation">
         <Menu className="size-5" />
       </button>

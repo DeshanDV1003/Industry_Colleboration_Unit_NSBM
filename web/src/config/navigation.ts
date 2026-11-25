@@ -1,5 +1,5 @@
 import {
-  Award, BadgeCheck, Building2, CalendarClock, Megaphone, BarChart3, Bot, Inbox, Trophy, CalendarDays, CalendarHeart, BookOpenCheck, Briefcase, CalendarCheck, ClipboardCheck, Compass, FileText, FolderKanban,
+  Award, BadgeCheck, FileBarChart, Building2, CalendarClock, Megaphone, BarChart3, Bot, Inbox, Trophy, CalendarDays, CalendarHeart, BookOpenCheck, Briefcase, CalendarCheck, ClipboardCheck, Compass, FileText, FolderKanban,
   Gauge, LayoutDashboard, ListChecks, Map, MessagesSquare, Mic, NotebookPen, Settings, ShieldCheck, Target,
   UserCog, UserSearch, Users, Wrench, type LucideIcon,
 } from 'lucide-react'
@@ -20,6 +20,7 @@ export interface NavSection {
 
 const overview: NavItem = { label: 'Overview', to: '/dashboard', icon: LayoutDashboard, ready: true }
 const calendar: NavItem = { label: 'Year calendar', to: '/calendar', icon: CalendarDays, ready: true }
+const reports: NavItem = { label: 'Reports', to: '/reports', icon: FileBarChart, ready: true }
 
 /** Sidebar menu per portal. Paths follow the IndustryReady feature guide. */
 export const NAVIGATION: Record<Role, NavSection[]> = {
@@ -76,7 +77,7 @@ export const NAVIGATION: Record<Role, NavSection[]> = {
     },
     {
       title: 'Research',
-      items: [{ label: 'Research analytics', to: '/research', icon: BarChart3, ready: true }],
+      items: [{ label: 'Research analytics', to: '/research', icon: BarChart3, ready: true }, reports],
     },
   ],
   Industry: [
@@ -109,6 +110,7 @@ export const NAVIGATION: Record<Role, NavSection[]> = {
         { label: 'Announcements', to: '/announcements', icon: Megaphone, ready: true },
         { label: 'Hall allocations', to: '/hall-bookings', icon: CalendarClock, ready: true },
         { label: 'Partner enquiries', to: '/partner-enquiries', icon: Inbox, ready: true },
+        reports,
         { label: 'Research overview', to: '/research', icon: BarChart3, ready: true },
         { label: 'Settings', to: '/settings', icon: Settings, ready: true },
       ],
@@ -121,6 +123,7 @@ export const NAVIGATION: Record<Role, NavSection[]> = {
       items: [
         { label: 'Hall allocations', to: '/hall-bookings', icon: CalendarClock, ready: true },
         { label: 'Venues', to: '/venues', icon: Building2, ready: true },
+        reports,
       ],
     },
   ],

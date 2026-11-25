@@ -8,6 +8,7 @@ using NSBM.ICU.Infrastructure.Identity;
 using NSBM.ICU.Infrastructure.Persistence;
 using NSBM.ICU.Infrastructure.Persistence.Interceptors;
 using NSBM.ICU.Infrastructure.Persistence.Seed;
+using NSBM.ICU.Infrastructure.Reports;
 using NSBM.ICU.Infrastructure.Services;
 
 namespace NSBM.ICU.Infrastructure;
@@ -19,6 +20,7 @@ public static class DependencyInjection
         services.AddPersistence(configuration);
         services.AddIdentityServices(configuration);
         services.AddSingleton<IDateTime, DateTimeService>();
+        services.AddSingleton<IReportFileWriter, ExcelReportWriter>();
         services.AddAiServices(configuration);
         return services;
     }

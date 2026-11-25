@@ -59,6 +59,8 @@ def section(title):
 
 # ---------------------------------------------------------------- setup
 import time
+import io
+import zipfile
 for _ in range(60):  # wait for a freshly started API
     try:
         if call("GET", "/skills")[0] == 401:
@@ -143,6 +145,11 @@ READS = {
     "/announcements": {"Admin"},
     "/users": {"Admin"},
     "/users/options": {"Admin"},
+    "/reports/options": {"Admin", "Registrar", "Lecturer"},
+    f"/reports/hall-timetable?from={TODAY.isoformat()}&to={(TODAY + datetime.timedelta(days=30)).isoformat()}": {"Admin", "Registrar"},
+    "/reports/event-attendance": {"Admin"},
+    f"/reports/applications?from={(TODAY - datetime.timedelta(days=90)).isoformat()}&to={TODAY.isoformat()}": {"Admin"},
+    "/reports/student-participation": {"Admin", "Lecturer"},
 }
 for path, allowed in READS.items():
     for role, token in ROLE_TOKENS.items():
@@ -742,6 +749,64 @@ expect("only admins import", call("POST", "/users/import-students", lec, {"csv":
 # Deactivated accounts stay out: clean up so later runs and demos see only active test accounts as inactive.
 for user_id in (uid, lid):
     expect("deactivate test account", call("POST", f"/users/{user_id}/deactivate", adm), 204)
+
+# ---------------------------------------------------------------- M17 reports and exports
+section("M17 Reports and exports")
+
+def download(path, token):
+    req = urllib.request.Request(API + path)
+    req.add_header("Authorization", "Bearer " + token)
+    with urllib.request.urlopen(req, timeout=30) as r:
+        return r.status, r.headers.get("Content-Type", ""), r.headers.get("Content-Disposition", ""), r.read()
+
+def is_xlsx(content, *texts):
+    """A real .xlsx is a zip with a worksheet; the shared strings hold the cell text."""
+    try:
+        with zipfile.ZipFile(io.BytesIO(content)) as z:
+            names = z.namelist()
+            strings = z.read("xl/sharedStrings.xml").decode() if "xl/sharedStrings.xml" in names else ""
+            return "xl/worksheets/sheet1.xml" in names and all(t in strings for t in texts)
+    except zipfile.BadZipFile:
+        return False
+
+ropts = expect("report options", call("GET", "/reports/options", reg), 200)
+check("report filters offered", ropts["venues"] and ropts["cohorts"] and ropts["events"], ropts)
+win = f"from={TODAY.isoformat()}&to={(TODAY + datetime.timedelta(days=30)).isoformat()}"
+tt = expect("hall timetable", call("GET", f"/reports/hall-timetable?{win}", reg), 200)
+check("timetable columns", [c["header"] for c in tt["columns"]][:5] == ["Date", "Day", "From", "To", "Venue"], tt["columns"])
+check("timetable has the seeded lectures", sum(1 for r in tt["rows"] if r[7] == "Software Architecture") == 4, len(tt["rows"]))
+check("rows sorted by date then time", [(r[0], r[2]) for r in tt["rows"]] == sorted((r[0], r[2]) for r in tt["rows"]))
+se3 = call("GET", f"/reports/hall-timetable?{win}&programme=BSc (Hons) Software Engineering&academicYear=3".replace(" ", "%20"), reg)[1]
+check("cohort filter keeps only that cohort", se3["rows"] and all(r[8] == "BSc (Hons) Software Engineering · Year 3" for r in se3["rows"]) and "Year 3" in se3["subtitle"], se3["subtitle"])
+lh = next(v for v in ropts["venues"] if v["name"].startswith("LH-101"))
+check("venue filter", all(r[4].startswith("LH-101") for r in call("GET", f"/reports/hall-timetable?{win}&venueId={lh['id']}", reg)[1]["rows"]))
+expect("timetable range over six months", call("GET", f"/reports/hall-timetable?from={TODAY.isoformat()}&to={(TODAY + datetime.timedelta(days=200)).isoformat()}", reg), 400)
+expect("cohort needs a year", call("GET", f"/reports/hall-timetable?{win}&programme=X", reg), 400)
+
+status, ctype, disposition, content = download(f"/reports/hall-timetable?{win}&format=xlsx", reg)
+check("Excel download", status == 200 and ctype.startswith("application/vnd.openxmlformats") and f"hall-timetable-" in disposition, (ctype, disposition))
+check("Excel holds the title, headers and rows", is_xlsx(content, "Hall timetable", "Venue", "Software Architecture"))
+
+att = expect("event attendance", call("GET", "/reports/event-attendance", adm), 200)
+check("attendance lists registrations with certificates", att["rows"] and any(r[9] for r in att["rows"]) and "attended" in att["subtitle"], att["subtitle"])
+one = ropts["events"][0]
+check("attendance for one event", all(r[0] == one["name"] for r in call("GET", f"/reports/event-attendance?eventId={one['id']}", adm)[1]["rows"]))
+check("attendance Excel", is_xlsx(download("/reports/event-attendance?format=xlsx", adm)[3], "Event attendance", "Certificate code"))
+
+apps_from = (TODAY - datetime.timedelta(days=365)).isoformat()
+apps = expect("applications report", call("GET", f"/reports/applications?from={apps_from}&to={TODAY.isoformat()}", adm), 200)
+check("applications listed with status words", apps["rows"] and all(" " in r[8] or r[8].istitle() for r in apps["rows"]), [r[8] for r in apps["rows"]][:5])
+invited = call("GET", f"/reports/applications?from={apps_from}&to={TODAY.isoformat()}&status=InterviewInvited", adm)[1]
+check("status filter", invited["rows"] and all(r[8] == "Interview invited" for r in invited["rows"]), [r[8] for r in invited["rows"]])
+check("skill overlap labelled as a practice signal", "practice signal" in apps["subtitle"])
+
+part = expect("participation report", call("GET", "/reports/student-participation", lec), 200)
+check("every student listed by number", [r[0] for r in part["rows"]] == sorted(r[0] for r in part["rows"]) and len(part["rows"]) >= 5)
+check("participation is counts, never a score or rank", not any("score" in c["header"].lower() or "rank" in c["header"].lower() for c in part["columns"]) and "not a ranking" in part["subtitle"])
+sahan = next(r for r in part["rows"] if r[0] == "DEMO-001")
+check("student's own counts", sahan[8] >= 1 and sahan[11] >= 1, sahan)
+check("participation filter", all(r[2] == "BSc (Hons) Computer Science" for r in call("GET", "/reports/student-participation?programme=BSc%20(Hons)%20Computer%20Science", adm)[1]["rows"]))
+expect("partner cannot download reports", call("GET", "/reports/student-participation?format=xlsx", lanka), 403)
 
 # ---------------------------------------------------------------- restore
 section("Restore")

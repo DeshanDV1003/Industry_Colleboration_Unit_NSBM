@@ -54,6 +54,7 @@ const ResearchPage = lazy(() => import('@/features/research/pages/ResearchPage')
 const SettingsPage = lazy(() => import('@/features/settings/pages/SettingsPage'))
 const HallBookingsPage = lazy(() => import('@/features/venues/pages/HallBookingsPage'))
 const VenuesPage = lazy(() => import('@/features/venues/pages/VenuesPage'))
+const ReportsPage = lazy(() => import('@/features/reports/pages/ReportsPage'))
 const UsersPage = lazy(() => import('@/features/users/pages/UsersPage'))
 const AnnouncementsPage = lazy(() => import('@/features/announcements/pages/AnnouncementsPage'))
 
@@ -158,6 +159,11 @@ export const router = createBrowserRouter([
           {
             element: <RequireRole roles={['Lecturer', 'Admin']} />,
             children: [{ path: '/research', element: <ResearchPage /> }],
+          },
+          {
+            // Each report checks its own roles; the page lists only the reports the role may run.
+            element: <RequireRole roles={['Admin', 'Registrar', 'Lecturer']} />,
+            children: [{ path: '/reports', element: <ReportsPage /> }],
           },
           {
             // The registrar allocates halls; Unit admins follow the same pages read-only.

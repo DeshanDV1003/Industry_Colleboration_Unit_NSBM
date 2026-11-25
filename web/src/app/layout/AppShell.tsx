@@ -18,14 +18,14 @@ export function AppShell() {
 
       <div className="flex min-w-0 flex-1 flex-col">
         <Topbar />
-        <main className="flex-1 px-4 py-6 lg:px-8 lg:py-8">
+        <main className="flex-1 px-4 py-6 lg:px-8 lg:py-8 print:p-0">
           <div className="animate-enter mx-auto max-w-[1360px]">
             <Suspense fallback={<PageSpinner />}>
               <Outlet />
             </Suspense>
           </div>
         </main>
-        <footer className="flex flex-wrap justify-between gap-x-6 gap-y-1 border-t border-line px-8 py-5 text-xs text-muted">
+        <footer className="flex flex-wrap print:hidden justify-between gap-x-6 gap-y-1 border-t border-line px-8 py-5 text-xs text-muted">
           <span>{COPYRIGHT}</span>
           <span>Demo data is fictional. The platform supports people's decisions — it never makes hiring decisions.</span>
         </footer>

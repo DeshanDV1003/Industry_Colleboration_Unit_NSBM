@@ -245,6 +245,7 @@ Logo files live in `web/public/brand/`.
 | 14 | Playwright end-to-end suite (web/e2e): public pages, sign-in and role guards, every sidebar page per portal, student journey, cross-portal approvals, calendar, events, badges, AI interviewer state — **done** |
 | 15 | Assistant Registrar portal: venues, hall allocation for lectures (cohort = programme + year) and events, clash and capacity rules (`VenueBookingRules`), everyone affected notified (cohort, registered students, host company, admins); students see their halls on the calendar; admin announcements to everyone or one group — **done** |
 | 16 | User management: admin creates and edits accounts for every role (account + role profile saved in one transaction), deactivates/reactivates (open sessions stop at once via a token check; never yourself or the last admin), resets passwords, imports a cohort from CSV with a per-row report; everyone can change their own password; demo reset restores exactly the seeded accounts — **done** |
+| 17 | Reports & exports: hall timetable (admin, registrar), event attendance and internship applications (admin), student participation as counts, never a ranking (admin, lecturers). Each report is one `ReportTable` served as JSON for preview and printing (save as PDF from the print dialog) or as a typed, filterable Excel file (`IReportFileWriter`, ClosedXML) — **done** |
 
 ## 7. Responsible-use principles (from the guide)
 
