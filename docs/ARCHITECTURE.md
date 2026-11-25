@@ -247,6 +247,7 @@ Logo files live in `web/public/brand/`.
 | 16 | User management: admin creates and edits accounts for every role (account + role profile saved in one transaction), deactivates/reactivates (open sessions stop at once via a token check; never yourself or the last admin), resets passwords, imports a cohort from CSV with a per-row report; everyone can change their own password; demo reset restores exactly the seeded accounts — **done** |
 | 17 | Reports & exports: hall timetable (admin, registrar), event attendance and internship applications (admin), student participation as counts, never a ranking (admin, lecturers). Each report is one `ReportTable` served as JSON for preview and printing (save as PDF from the print dialog) or as a typed, filterable Excel file (`IReportFileWriter`, ClosedXML) — **done** |
 | 18 | Audit log: `IAuditTrail` records approvals, account changes, password resets (never the password), hall allocations, announcements, calendar changes, partner application decisions, certificates and demo resets in the same save as the change; append-only (no edit/delete endpoint, kept through demo resets); admin page with area, search (incl. account e-mail), date filters, paging and Excel export — **done** |
+| 19 | Deployment readiness: no secrets in committed settings (environment / user-secrets), the API refuses unsafe settings at start-up, real deployments seed no demo data and get their first admin from Bootstrap settings, UTC timestamps sent with `Z`, forwarded-headers support for the rate limiter, `/health/live` and `/health/ready`, security headers and HSTS, demo UI compiled out of production builds, Dockerfiles + docker-compose (SQL Server, API, nginx web) and [DEPLOYMENT.md](DEPLOYMENT.md) — **done** |
 
 ## 7. Responsible-use principles (from the guide)
 
@@ -269,6 +270,17 @@ Manual:
 dotnet run --project src/NSBM.ICU.API --launch-profile http     # API :5300, migrates + seeds
 npm run dev --prefix web                                         # Web :5301
 ```
+
+Settings: `appsettings.json` holds safe defaults only (no secrets, demo off). `appsettings.Development.json` holds
+local development values, with a Windows-authentication connection string to `.\SQLEXPRESS`. If your SQL Server
+uses a SQL login instead, keep that connection string out of the repository with user-secrets:
+
+```
+dotnet user-secrets set "ConnectionStrings:DefaultConnection" "<connection string>" --project src/NSBM.ICU.API
+```
+
+Always start the API with the `http` launch profile (as above). `dotnet run --environment ...` does not set the
+ASP.NET environment on the .NET 10 SDK. Deploying to a server: see [DEPLOYMENT.md](DEPLOYMENT.md).
 
 New migration:
 

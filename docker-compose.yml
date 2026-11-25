@@ -1,0 +1,64 @@
+# NSBM Industry Collaboration Unit: database, API and web app on one host.
+#   1. cp .env.example .env   and fill in every value
+#   2. docker compose up -d --build
+#   3. open http://<host>:${WEB_PORT}  (put HTTPS in front for real use; see docs/DEPLOYMENT.md)
+
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+    volumes:
+      - db-data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      retries: 12
+    restart: unless-stopped
+    networks: [icu]
+
+  api:
+    build:
+      context: .
+      dockerfile: deploy/api/Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ConnectionStrings__DefaultConnection: "Server=db;Database=NSBM_ICU;User Id=sa;Password=${DB_PASSWORD};TrustServerCertificate=True;MultipleActiveResultSets=true"
+      Jwt__Secret: ${JWT_SECRET:?Set JWT_SECRET in .env}
+      Demo__Enabled: ${DEMO_MODE:-false}
+      # The web container serves the app and proxies /api, so browser requests are same-origin.
+      ServeWebOnSameOrigin: "true"
+      # Trust X-Forwarded-For only from containers on this network (the nginx in front).
+      ForwardedHeaders__Enabled: "true"
+      ForwardedHeaders__KnownNetworks__0: "172.28.0.0/16"
+      Bootstrap__AdminEmail: ${BOOTSTRAP_ADMIN_EMAIL:-}
+      Bootstrap__AdminPassword: ${BOOTSTRAP_ADMIN_PASSWORD:-}
+      Bootstrap__AdminFirstName: ${BOOTSTRAP_ADMIN_FIRST_NAME:-}
+      Bootstrap__AdminLastName: ${BOOTSTRAP_ADMIN_LAST_NAME:-}
+      Anthropic__ApiKey: ${ANTHROPIC_API_KEY:-}
+    restart: unless-stopped
+    networks: [icu]
+
+  web:
+    build:
+      context: .
+      dockerfile: deploy/web/Dockerfile
+      args:
+        VITE_DEMO_MODE: ${DEMO_MODE:-false}
+    depends_on: [api]
+    ports:
+      - "${WEB_PORT:-8080}:80"
+    restart: unless-stopped
+    networks: [icu]
+
+networks:
+  icu:
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
+
+volumes:
+  db-data:

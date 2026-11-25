@@ -1,0 +1,15 @@
+**/bin/
+**/obj/
+**/.vs/
+**/*.user
+.git/
+.claude/
+.env
+docs/
+tests/
+web/node_modules/
+web/dist/
+web/e2e/
+web/e2e-report/
+web/e2e-results/
+web/public/mediapipe/

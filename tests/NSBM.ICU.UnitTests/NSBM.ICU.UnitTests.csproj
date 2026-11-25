@@ -20,6 +20,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\NSBM.ICU.Application\NSBM.ICU.Application.csproj" />
     <ProjectReference Include="..\..\src\NSBM.ICU.Infrastructure\NSBM.ICU.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\NSBM.ICU.API\NSBM.ICU.API.csproj" />
   </ItemGroup>
 
 </Project>

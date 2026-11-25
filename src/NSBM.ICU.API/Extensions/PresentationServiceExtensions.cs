@@ -5,6 +5,9 @@ using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Net;
+using Microsoft.AspNetCore.HttpOverrides;
+using NSBM.ICU.API.Serialization;
 using NSBM.ICU.API.Services;
 using NSBM.ICU.Application.Common.Interfaces;
 using NSBM.ICU.Infrastructure.Identity;
@@ -15,19 +18,26 @@ public static class PresentationServiceExtensions
 {
     public const string WebClientCorsPolicy = "WebClient";
     public const string PublicFormsRateLimit = "PublicForms";
+    public const string ReadyTag = "ready";
 
     public static IServiceCollection AddPresentation(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddHttpContextAccessor();
         services.AddScoped<ICurrentUser, CurrentUser>();
         services.AddControllers()
-            .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+            .AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                options.JsonSerializerOptions.Converters.Add(new UtcDateTimeConverter());
+            });
 
         services.AddJwtAuthentication(configuration);
         services.AddAuthorization();
         services.AddWebClientCors(configuration);
         services.AddSwagger();
         services.AddPublicFormRateLimit();
+        services.AddProxySupport(configuration);
+        services.AddHealthChecks().AddCheck<DatabaseHealthCheck>("database", tags: [ReadyTag]);
 
         return services;
     }
@@ -105,6 +115,26 @@ public static class PresentationServiceExtensions
             };
             options.AddSecurityDefinition("Bearer", scheme);
             options.AddSecurityRequirement(new OpenApiSecurityRequirement { [scheme] = [] });
+        });
+    }
+
+    /// <summary>
+    /// Behind a reverse proxy (nginx, a load balancer) the client's address arrives in X-Forwarded-For. Only the
+    /// listed proxies are trusted, so the public-form rate limit counts real clients, not the proxy.
+    /// </summary>
+    private static void AddProxySupport(this IServiceCollection services, IConfiguration configuration)
+    {
+        var section = configuration.GetSection("ForwardedHeaders");
+        services.Configure<ForwardedHeadersOptions>(options =>
+        {
+            options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+            foreach (var proxy in section.GetSection("KnownProxies").Get<string[]>() ?? [])
+                options.KnownProxies.Add(IPAddress.Parse(proxy));
+            foreach (var network in section.GetSection("KnownNetworks").Get<string[]>() ?? [])
+            {
+                var parts = network.Split('/');
+                options.KnownNetworks.Add(new Microsoft.AspNetCore.HttpOverrides.IPNetwork(IPAddress.Parse(parts[0]), int.Parse(parts[1])));
+            }
         });
     }
 }

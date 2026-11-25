@@ -36,8 +36,9 @@ public static class DependencyInjection
 
     private static void AddPersistence(this IServiceCollection services, IConfiguration configuration)
     {
-        var connectionString = configuration.GetConnectionString("DefaultConnection")
-            ?? throw new InvalidOperationException("Connection string 'DefaultConnection' is not configured.");
+        var connectionString = configuration.GetConnectionString("DefaultConnection");
+        if (string.IsNullOrWhiteSpace(connectionString))
+            throw new InvalidOperationException("Connection string 'DefaultConnection' is not configured (ConnectionStrings__DefaultConnection).");
 
         services.AddScoped<AuditableEntityInterceptor>();
         services.AddDbContext<ApplicationDbContext>((sp, options) => options
@@ -58,6 +59,7 @@ public static class DependencyInjection
         services.AddScoped<AchievementSeeder>();
         services.AddScoped<CalendarSeeder>();
         services.AddScoped<VenueSeeder>();
+        services.AddScoped<BootstrapAdminSeeder>();
         services.AddScoped<DatabaseSeeder>();
         services.AddScoped<IDemoDataService, DemoDataService>();
         services.AddScoped<IAuditTrail, AuditTrail>();
@@ -67,6 +69,7 @@ public static class DependencyInjection
     {
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
         services.Configure<DemoOptions>(configuration.GetSection(DemoOptions.SectionName));
+        services.Configure<BootstrapOptions>(configuration.GetSection(BootstrapOptions.SectionName));
 
         services.AddIdentityCore<ApplicationUser>(options =>
             {

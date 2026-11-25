@@ -21,3 +21,6 @@ web/public/mediapipe/
 # Playwright output
 web/e2e-report/
 web/e2e-results/
+
+# Deployment secrets (see .env.example)
+/.env

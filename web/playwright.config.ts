@@ -28,7 +28,8 @@ export default defineConfig({
   // Reuses the dev servers when they are already running; otherwise starts them.
   webServer: [
     {
-      command: 'dotnet run --project ../src/NSBM.ICU.API --no-launch-profile --urls http://localhost:5300 --environment Development',
+      // The "http" launch profile sets the Development environment and port 5300.
+      command: 'dotnet run --project ../src/NSBM.ICU.API --launch-profile http',
       url: `${API_URL}/showcase`,
       reuseExistingServer: true,
       timeout: 180_000,
