@@ -27,3 +27,6 @@ web/e2e-results/
 
 # Development e-mail inbox (.eml files written in Email:Mode=File)
 src/NSBM.ICU.API/App_Data/
+
+# System guide builder
+docs/user-guide/build/node_modules/

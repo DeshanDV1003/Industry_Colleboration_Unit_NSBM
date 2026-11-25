@@ -53,17 +53,18 @@ test.describe('Halls and announcements', () => {
   })
 
   test('admin announcement reaches every portal', async ({ page, signInAs }) => {
+    const title = `E2E campus notice ${Date.now().toString().slice(-6)}`
     await signInAs('admin')
     await page.goto('/announcements')
-    await page.getByLabel('Title').fill('E2E campus notice')
+    await page.getByLabel('Title').fill(title)
     await page.getByLabel('Message').fill('The library opens late on Monday.')
     await page.getByRole('button', { name: 'Send announcement' }).click()
     await expect(page.getByText('Announcement sent to everyone.')).toBeVisible()
-    await expect(page.getByText('E2E campus notice')).toBeVisible()
+    await expect(page.getByText(title)).toBeVisible()
 
     for (const account of ['student', 'lecturer', 'partner', 'registrar'] as const) {
       const notes = await apiAs<Notifications>(account, 'GET', 'me/notifications')
-      expect(notes.items.some((n) => n.kind === 'Announcement' && n.title === 'E2E campus notice'), account).toBe(true)
+      expect(notes.items.some((n) => n.kind === 'Announcement' && n.title === title), account).toBe(true)
     }
   })
 })

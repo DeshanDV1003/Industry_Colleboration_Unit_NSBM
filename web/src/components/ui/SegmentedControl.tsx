@@ -15,6 +15,8 @@ export function SegmentedControl<T extends string>({ value, options, onChange, a
         return (
           <button
             key={option.value}
+            // Never a submit button: this control is used inside forms, where a default button would submit them.
+            type="button"
             role="tab"
             aria-selected={active}
             onClick={() => onChange(option.value)}

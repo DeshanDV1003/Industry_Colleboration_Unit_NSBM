@@ -1,0 +1,11 @@
+{
+  "name": "nsbm-icu-system-guide",
+  "private": true,
+  "description": "Builds docs/user-guide/NSBM-ICU-System-Guide.docx from the captured screenshots.",
+  "scripts": {
+    "build": "node build-system-guide.cjs"
+  },
+  "dependencies": {
+    "docx": "^9.16.0"
+  }
+}

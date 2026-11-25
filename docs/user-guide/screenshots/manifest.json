@@ -1,0 +1,684 @@
+{
+  "captured": [
+    {
+      "group": "public",
+      "name": "showcase",
+      "title": "Public showcase homepage",
+      "file": "screenshots/public/01-showcase.png",
+      "url": "/"
+    },
+    {
+      "group": "public",
+      "name": "sign-in",
+      "title": "Sign in",
+      "file": "screenshots/public/02-sign-in.png",
+      "url": "/login"
+    },
+    {
+      "group": "public",
+      "name": "forgot-password",
+      "title": "Forgot password",
+      "file": "screenshots/public/03-forgot-password.png",
+      "url": "/forgot-password"
+    },
+    {
+      "group": "public",
+      "name": "reset-password",
+      "title": "Choose a new password (opened from the e-mailed link)",
+      "file": "screenshots/public/04-reset-password.png",
+      "url": "/reset-password?email=student%40nsbm.demo&token=example"
+    },
+    {
+      "group": "public",
+      "name": "verify-certificate",
+      "title": "Public certificate verification",
+      "file": "screenshots/public/05-verify-certificate.png",
+      "url": "/verify/ICU-8AET5D5UJD"
+    },
+    {
+      "group": "student",
+      "name": "dashboard-new",
+      "title": "Dashboard for a new student (no career path yet)",
+      "file": "screenshots/student/01-dashboard-new.png",
+      "url": "/dashboard"
+    },
+    {
+      "group": "student",
+      "name": "career-pathways",
+      "title": "Career pathways",
+      "file": "screenshots/student/02-career-pathways.png",
+      "url": "/pathways"
+    },
+    {
+      "group": "student",
+      "name": "skills-baseline-quiz",
+      "title": "Skills baseline: the questions",
+      "file": "screenshots/student/03-skills-baseline-quiz.png",
+      "url": "/baseline"
+    },
+    {
+      "group": "student",
+      "name": "skills-baseline-result",
+      "title": "Skills baseline: the result",
+      "file": "screenshots/student/04-skills-baseline-result.png",
+      "url": "/baseline"
+    },
+    {
+      "group": "student",
+      "name": "learning-roadmap",
+      "title": "Learning roadmap",
+      "file": "screenshots/student/05-learning-roadmap.png",
+      "url": "/roadmap"
+    },
+    {
+      "group": "student",
+      "name": "readiness-and-gaps",
+      "title": "Readiness and skill gaps",
+      "file": "screenshots/student/06-readiness-and-gaps.png",
+      "url": "/readiness"
+    },
+    {
+      "group": "student",
+      "name": "industry-task-library",
+      "title": "Industry task library",
+      "file": "screenshots/student/07-industry-task-library.png",
+      "url": "/tasks"
+    },
+    {
+      "group": "student",
+      "name": "task-workbench",
+      "title": "Task workbench (brief, code editor and automatic checks)",
+      "file": "screenshots/student/08-task-workbench.png",
+      "url": "/tasks/2149"
+    },
+    {
+      "group": "student",
+      "name": "task-attempt-feedback",
+      "title": "Task attempt with check results",
+      "file": "screenshots/student/09-task-attempt-feedback.png",
+      "url": "/tasks/2149"
+    },
+    {
+      "group": "student",
+      "name": "knowledge-check",
+      "title": "Knowledge check for a task",
+      "file": "screenshots/student/10-knowledge-check.png",
+      "url": "/assessment/2149"
+    },
+    {
+      "group": "student",
+      "name": "team-simulation",
+      "title": "Team simulation (practice sprint board)",
+      "file": "screenshots/student/11-team-simulation.png",
+      "url": "/team-simulation"
+    },
+    {
+      "group": "student",
+      "name": "mentor-center",
+      "title": "Mentor center",
+      "file": "screenshots/student/12-mentor-center.png",
+      "url": "/mentor-center"
+    },
+    {
+      "group": "student",
+      "name": "events-and-hackathons",
+      "title": "Events and hackathons",
+      "file": "screenshots/student/13-events-and-hackathons.png",
+      "url": "/events"
+    },
+    {
+      "group": "student",
+      "name": "event-detail",
+      "title": "Event details, registration and teams",
+      "file": "screenshots/student/14-event-detail.png",
+      "url": "/events/1564"
+    },
+    {
+      "group": "student",
+      "name": "certificates",
+      "title": "My certificates",
+      "file": "screenshots/student/15-certificates.png",
+      "url": "/certificates"
+    },
+    {
+      "group": "student",
+      "name": "portfolio",
+      "title": "Portfolio",
+      "file": "screenshots/student/16-portfolio.png",
+      "url": "/portfolio"
+    },
+    {
+      "group": "student",
+      "name": "achievements",
+      "title": "Achievements: streak, level, badges and profile card",
+      "file": "screenshots/student/17-achievements.png",
+      "url": "/achievements"
+    },
+    {
+      "group": "student",
+      "name": "ai-interviewer",
+      "title": "AI interviewer",
+      "file": "screenshots/student/18-ai-interviewer.png",
+      "url": "/ai-interview"
+    },
+    {
+      "group": "student",
+      "name": "soft-skills-practice",
+      "title": "Soft-skills interview practice",
+      "file": "screenshots/student/19-soft-skills-practice.png",
+      "url": "/interview-prep"
+    },
+    {
+      "group": "student",
+      "name": "technical-interview",
+      "title": "Technical interview practice",
+      "file": "screenshots/student/20-technical-interview.png",
+      "url": "/interview"
+    },
+    {
+      "group": "student",
+      "name": "interview-report",
+      "title": "Interview report",
+      "file": "screenshots/student/21-interview-report.png",
+      "url": "/interview-report"
+    },
+    {
+      "group": "student",
+      "name": "cv-studio",
+      "title": "CV studio",
+      "file": "screenshots/student/22-cv-studio.png",
+      "url": "/cv-studio"
+    },
+    {
+      "group": "student",
+      "name": "career-center",
+      "title": "Career center (internship vacancies)",
+      "file": "screenshots/student/23-career-center.png",
+      "url": "/career-center"
+    },
+    {
+      "group": "student",
+      "name": "my-applications",
+      "title": "My applications",
+      "file": "screenshots/student/24-my-applications.png",
+      "url": "/applications"
+    },
+    {
+      "group": "student",
+      "name": "planner",
+      "title": "Planner",
+      "file": "screenshots/student/25-planner.png",
+      "url": "/planner"
+    },
+    {
+      "group": "student",
+      "name": "year-calendar",
+      "title": "Year calendar (with lecture halls)",
+      "file": "screenshots/student/26-year-calendar.png",
+      "url": "/calendar"
+    },
+    {
+      "group": "student",
+      "name": "notifications",
+      "title": "Notifications and weekly summary",
+      "file": "screenshots/student/27-notifications.png",
+      "url": "/notifications"
+    },
+    {
+      "group": "student",
+      "name": "my-settings",
+      "title": "My settings (e-mail choices and password)",
+      "file": "screenshots/student/28-my-settings.png",
+      "url": "/my-settings"
+    },
+    {
+      "group": "student",
+      "name": "change-password",
+      "title": "Change password",
+      "file": "screenshots/student/29-change-password.png",
+      "url": "/my-settings"
+    },
+    {
+      "group": "student",
+      "name": "dashboard",
+      "title": "Dashboard with progress",
+      "file": "screenshots/student/30-dashboard.png",
+      "url": "/dashboard"
+    },
+    {
+      "group": "student",
+      "name": "user-menu",
+      "title": "User menu",
+      "file": "screenshots/student/31-user-menu.png",
+      "url": "/dashboard"
+    },
+    {
+      "group": "public",
+      "name": "profile-card",
+      "title": "A student's public profile card",
+      "file": "screenshots/public/06-profile-card.png",
+      "url": "/card/xwftupsb7xs3"
+    },
+    {
+      "group": "partner",
+      "name": "dashboard",
+      "title": "Dashboard",
+      "file": "screenshots/partner/01-dashboard.png",
+      "url": "/dashboard"
+    },
+    {
+      "group": "partner",
+      "name": "industry-challenges",
+      "title": "Industry challenges (tasks)",
+      "file": "screenshots/partner/02-industry-challenges.png",
+      "url": "/industry"
+    },
+    {
+      "group": "partner",
+      "name": "task-editor-new",
+      "title": "Create an industry task",
+      "file": "screenshots/partner/03-task-editor-new.png",
+      "url": "/industry/tasks/new"
+    },
+    {
+      "group": "partner",
+      "name": "task-editor-edit",
+      "title": "Edit an industry task (pending review)",
+      "file": "screenshots/partner/04-task-editor-edit.png",
+      "url": "/industry/tasks/2155/edit"
+    },
+    {
+      "group": "partner",
+      "name": "vacancies",
+      "title": "Vacancies (industry hub)",
+      "file": "screenshots/partner/05-vacancies.png",
+      "url": "/industry-hub"
+    },
+    {
+      "group": "partner",
+      "name": "vacancy-editor-new",
+      "title": "Create a vacancy",
+      "file": "screenshots/partner/06-vacancy-editor-new.png",
+      "url": "/industry-hub/vacancies/new"
+    },
+    {
+      "group": "partner",
+      "name": "vacancy-locked",
+      "title": "An approved vacancy is locked for editing",
+      "file": "screenshots/partner/07-vacancy-locked.png",
+      "url": "/industry-hub/vacancies/1872/edit"
+    },
+    {
+      "group": "partner",
+      "name": "candidate-review",
+      "title": "Candidate review",
+      "file": "screenshots/partner/08-candidate-review.png",
+      "url": "/candidate-review"
+    },
+    {
+      "group": "partner",
+      "name": "candidate-evidence",
+      "title": "Comparing an applicant's skills and practice evidence with the vacancy",
+      "file": "screenshots/partner/09-candidate-evidence.png",
+      "url": "/candidate-review"
+    },
+    {
+      "group": "partner",
+      "name": "mentoring-and-reviews",
+      "title": "Mentoring and task reviews",
+      "file": "screenshots/partner/10-mentoring-and-reviews.png",
+      "url": "/industry-feedback"
+    },
+    {
+      "group": "partner",
+      "name": "events",
+      "title": "Events and hackathons (hosting)",
+      "file": "screenshots/partner/11-events.png",
+      "url": "/industry-events"
+    },
+    {
+      "group": "partner",
+      "name": "event-editor-new",
+      "title": "Create an event",
+      "file": "screenshots/partner/12-event-editor-new.png",
+      "url": "/industry-events/new"
+    },
+    {
+      "group": "partner",
+      "name": "event-editor-edit",
+      "title": "Edit an event",
+      "file": "screenshots/partner/13-event-editor-edit.png",
+      "url": "/industry-events/1566/edit"
+    },
+    {
+      "group": "partner",
+      "name": "event-attendance",
+      "title": "Attendance and certificates (a finished event)",
+      "file": "screenshots/partner/14-event-attendance.png",
+      "url": "/industry-events/1567/attendance"
+    },
+    {
+      "group": "partner",
+      "name": "year-calendar",
+      "title": "Year calendar",
+      "file": "screenshots/partner/15-year-calendar.png",
+      "url": "/calendar"
+    },
+    {
+      "group": "partner",
+      "name": "notifications",
+      "title": "Notifications",
+      "file": "screenshots/partner/16-notifications.png",
+      "url": "/notifications"
+    },
+    {
+      "group": "lecturer",
+      "name": "dashboard",
+      "title": "Dashboard",
+      "file": "screenshots/lecturer/01-dashboard.png",
+      "url": "/dashboard"
+    },
+    {
+      "group": "lecturer",
+      "name": "student-directory",
+      "title": "Student directory",
+      "file": "screenshots/lecturer/02-student-directory.png",
+      "url": "/lecturer"
+    },
+    {
+      "group": "lecturer",
+      "name": "student-insights",
+      "title": "Student insights",
+      "file": "screenshots/lecturer/03-student-insights.png",
+      "url": "/lecturer-insights"
+    },
+    {
+      "group": "lecturer",
+      "name": "student-insights-detail",
+      "title": "Student insights for one student (support signals, notes, assigned tasks)",
+      "file": "screenshots/lecturer/04-student-insights-detail.png",
+      "url": "/lecturer-insights?student=1"
+    },
+    {
+      "group": "lecturer",
+      "name": "badge-reviews",
+      "title": "Badge reviews",
+      "file": "screenshots/lecturer/05-badge-reviews.png",
+      "url": "/badge-reviews"
+    },
+    {
+      "group": "lecturer",
+      "name": "analytics",
+      "title": "Analytics",
+      "file": "screenshots/lecturer/06-analytics.png",
+      "url": "/analytics"
+    },
+    {
+      "group": "lecturer",
+      "name": "research-analytics",
+      "title": "Research analytics",
+      "file": "screenshots/lecturer/07-research-analytics.png",
+      "url": "/research"
+    },
+    {
+      "group": "lecturer",
+      "name": "reports",
+      "title": "Reports (student participation)",
+      "file": "screenshots/lecturer/08-reports.png",
+      "url": "/reports"
+    },
+    {
+      "group": "lecturer",
+      "name": "reports-preview",
+      "title": "Student participation report preview",
+      "file": "screenshots/lecturer/09-reports-preview.png",
+      "url": "/reports"
+    },
+    {
+      "group": "lecturer",
+      "name": "year-calendar",
+      "title": "Year calendar",
+      "file": "screenshots/lecturer/10-year-calendar.png",
+      "url": "/calendar"
+    },
+    {
+      "group": "registrar",
+      "name": "dashboard",
+      "title": "Dashboard",
+      "file": "screenshots/registrar/01-dashboard.png",
+      "url": "/dashboard"
+    },
+    {
+      "group": "registrar",
+      "name": "hall-allocations",
+      "title": "Hall allocations (this week)",
+      "file": "screenshots/registrar/02-hall-allocations.png",
+      "url": "/hall-bookings"
+    },
+    {
+      "group": "registrar",
+      "name": "hall-allocations-next-week",
+      "title": "Hall allocations (next week, with weekly lectures)",
+      "file": "screenshots/registrar/03-hall-allocations-next-week.png",
+      "url": "/hall-bookings"
+    },
+    {
+      "group": "registrar",
+      "name": "allocate-hall-lecture",
+      "title": "Allocate a hall to a cohort lecture",
+      "file": "screenshots/registrar/04-allocate-hall-lecture.png",
+      "url": "/hall-bookings"
+    },
+    {
+      "group": "registrar",
+      "name": "allocate-hall-event",
+      "title": "Allocate a hall to a partner event",
+      "file": "screenshots/registrar/05-allocate-hall-event.png",
+      "url": "/hall-bookings"
+    },
+    {
+      "group": "registrar",
+      "name": "venues",
+      "title": "Venues",
+      "file": "screenshots/registrar/06-venues.png",
+      "url": "/venues"
+    },
+    {
+      "group": "registrar",
+      "name": "add-venue",
+      "title": "Add a venue",
+      "file": "screenshots/registrar/07-add-venue.png",
+      "url": "/venues"
+    },
+    {
+      "group": "registrar",
+      "name": "reports",
+      "title": "Reports (hall timetable)",
+      "file": "screenshots/registrar/08-reports.png",
+      "url": "/reports"
+    },
+    {
+      "group": "registrar",
+      "name": "hall-timetable-report",
+      "title": "Hall timetable report preview",
+      "file": "screenshots/registrar/09-hall-timetable-report.png",
+      "url": "/reports"
+    },
+    {
+      "group": "registrar",
+      "name": "year-calendar",
+      "title": "Year calendar",
+      "file": "screenshots/registrar/10-year-calendar.png",
+      "url": "/calendar"
+    },
+    {
+      "group": "registrar",
+      "name": "notifications",
+      "title": "Notifications",
+      "file": "screenshots/registrar/11-notifications.png",
+      "url": "/notifications"
+    },
+    {
+      "group": "admin",
+      "name": "dashboard",
+      "title": "Dashboard",
+      "file": "screenshots/admin/01-dashboard.png",
+      "url": "/dashboard"
+    },
+    {
+      "group": "admin",
+      "name": "year-calendar",
+      "title": "Year calendar (planning)",
+      "file": "screenshots/admin/02-year-calendar.png",
+      "url": "/calendar"
+    },
+    {
+      "group": "admin",
+      "name": "add-calendar-event",
+      "title": "Add a calendar event",
+      "file": "screenshots/admin/03-add-calendar-event.png",
+      "url": "/calendar"
+    },
+    {
+      "group": "admin",
+      "name": "task-approvals",
+      "title": "Task approvals",
+      "file": "screenshots/admin/04-task-approvals.png",
+      "url": "/admin"
+    },
+    {
+      "group": "admin",
+      "name": "task-review-dialog",
+      "title": "Reviewing a partner task",
+      "file": "screenshots/admin/05-task-review-dialog.png",
+      "url": "/admin"
+    },
+    {
+      "group": "admin",
+      "name": "vacancy-approvals",
+      "title": "Vacancy approvals",
+      "file": "screenshots/admin/06-vacancy-approvals.png",
+      "url": "/admin-vacancies"
+    },
+    {
+      "group": "admin",
+      "name": "event-approvals",
+      "title": "Event approvals",
+      "file": "screenshots/admin/07-event-approvals.png",
+      "url": "/admin-events"
+    },
+    {
+      "group": "admin",
+      "name": "users",
+      "title": "Users",
+      "file": "screenshots/admin/08-users.png",
+      "url": "/users"
+    },
+    {
+      "group": "admin",
+      "name": "add-account",
+      "title": "Add an account",
+      "file": "screenshots/admin/09-add-account.png",
+      "url": "/users"
+    },
+    {
+      "group": "admin",
+      "name": "import-students",
+      "title": "Import students from CSV",
+      "file": "screenshots/admin/10-import-students.png",
+      "url": "/users"
+    },
+    {
+      "group": "admin",
+      "name": "reset-password",
+      "title": "Reset a user's password",
+      "file": "screenshots/admin/11-reset-password.png",
+      "url": "/users"
+    },
+    {
+      "group": "admin",
+      "name": "announcements",
+      "title": "Announcements",
+      "file": "screenshots/admin/12-announcements.png",
+      "url": "/announcements"
+    },
+    {
+      "group": "admin",
+      "name": "hall-allocations-week",
+      "title": "Hall allocations (read-only)",
+      "file": "screenshots/admin/13-hall-allocations-week.png",
+      "url": "/hall-bookings"
+    },
+    {
+      "group": "admin",
+      "name": "hall-allocations",
+      "title": "Hall allocations next week (read-only for the admin)",
+      "file": "screenshots/admin/14-hall-allocations.png",
+      "url": "/hall-bookings"
+    },
+    {
+      "group": "admin",
+      "name": "partner-enquiries",
+      "title": "Partner enquiries",
+      "file": "screenshots/admin/15-partner-enquiries.png",
+      "url": "/partner-enquiries"
+    },
+    {
+      "group": "admin",
+      "name": "analytics",
+      "title": "Analytics dashboard",
+      "file": "screenshots/admin/16-analytics.png",
+      "url": "/analytics"
+    },
+    {
+      "group": "admin",
+      "name": "reports",
+      "title": "Reports",
+      "file": "screenshots/admin/17-reports.png",
+      "url": "/reports"
+    },
+    {
+      "group": "admin",
+      "name": "applications-report",
+      "title": "Internship applications report preview",
+      "file": "screenshots/admin/18-applications-report.png",
+      "url": "/reports"
+    },
+    {
+      "group": "admin",
+      "name": "audit-log",
+      "title": "Audit log",
+      "file": "screenshots/admin/19-audit-log.png",
+      "url": "/audit"
+    },
+    {
+      "group": "admin",
+      "name": "research-overview",
+      "title": "Research overview",
+      "file": "screenshots/admin/20-research-overview.png",
+      "url": "/research"
+    },
+    {
+      "group": "admin",
+      "name": "settings",
+      "title": "Settings (profile, e-mail test, demo reset)",
+      "file": "screenshots/admin/21-settings.png",
+      "url": "/settings"
+    },
+    {
+      "group": "admin",
+      "name": "notifications",
+      "title": "Notifications",
+      "file": "screenshots/admin/22-notifications.png",
+      "url": "/notifications"
+    },
+    {
+      "group": "demo",
+      "name": "role-switcher",
+      "title": "Demo role switcher (demo mode only)",
+      "file": "screenshots/demo/01-role-switcher.png",
+      "url": "/dashboard"
+    }
+  ],
+  "failures": []
+}
