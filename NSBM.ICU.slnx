@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/NSBM.ICU.Domain/NSBM.ICU.Domain.csproj" />
+    <Project Path="src/NSBM.ICU.Application/NSBM.ICU.Application.csproj" />
+    <Project Path="src/NSBM.ICU.Infrastructure/NSBM.ICU.Infrastructure.csproj" />
+    <Project Path="src/NSBM.ICU.API/NSBM.ICU.API.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/NSBM.ICU.UnitTests/NSBM.ICU.UnitTests.csproj" />
+  </Folder>
+</Solution>

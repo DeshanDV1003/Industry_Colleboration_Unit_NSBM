@@ -1,0 +1,115 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Roboto+Slab:wght@500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── NSBM Green University design tokens (source: nsbm.ac.lk) ───────────────── */
+
+:root,
+[data-theme='light'] {
+  --color-primary: #0b5cad;          /* NSBM Blue 600 */
+  --color-primary-hover: #0a4a8c;    /* NSBM Blue 700 */
+  --color-primary-soft: #eef6ff;     /* NSBM Blue 50  */
+  --color-accent: #168550;           /* NSBM Green 600 */
+  --color-accent-soft: #edfbf2;      /* NSBM Green 50  */
+
+  --color-success: #168550;
+  --color-success-soft: #edfbf2;
+  --color-warning: #b45309;
+  --color-warning-soft: #fef3c7;
+  --color-danger: #dc2626;
+  --color-danger-soft: #fee2e2;
+
+  --color-heading: #172232;          /* Neutral 900 */
+  --color-text: #3a495c;             /* Neutral 700 */
+  --color-text-muted: #6b7c91;       /* Neutral 500 */
+
+  --color-bg-page: #f5f8fc;          /* Neutral 50 */
+  --color-bg-card: #ffffff;
+  --color-bg-subtle: #edf2f8;        /* Neutral 100 */
+  --color-bg-sidebar: #ffffff;
+  --color-bg-input: #ffffff;
+
+  --color-border: #dfe6ef;           /* Neutral 200 */
+  --color-border-strong: #c7d2df;    /* Neutral 300 */
+
+  --gradient-brand: linear-gradient(120deg, #0a4a8c 0%, #1a6fd1 50%, #1fa463 100%);
+
+  /* Code surfaces stay dark in both themes. */
+  --color-code-bg: #0b1422;
+  --color-code-text: #e6edf3;
+  --color-code-muted: #6b7c91;
+  --color-code-border: #273445;
+
+  --shadow-card: 0 1px 2px rgb(23 34 50 / 0.04), 0 4px 16px rgb(23 34 50 / 0.05);
+  --shadow-pop: 0 12px 32px rgb(23 34 50 / 0.14);
+  --radius-card: 16px;
+  --radius-control: 10px;
+}
+
+[data-theme='dark'] {
+  --color-primary: #4891ee;          /* NSBM Blue 400 */
+  --color-primary-hover: #7fb5f7;    /* NSBM Blue 300 */
+  --color-primary-soft: rgb(72 145 238 / 0.14);
+  --color-accent: #3bbf7a;           /* NSBM Green 400 */
+  --color-accent-soft: rgb(59 191 122 / 0.14);
+
+  --color-success: #3bbf7a;
+  --color-success-soft: rgb(59 191 122 / 0.14);
+  --color-warning: #fbbf24;
+  --color-warning-soft: rgb(251 191 36 / 0.14);
+  --color-danger: #f87171;
+  --color-danger-soft: rgb(248 113 113 / 0.14);
+
+  --color-heading: #edf2f8;
+  --color-text: #c7d2df;
+  --color-text-muted: #9aa9bc;
+
+  --color-bg-page: #0b1422;          /* Neutral 950 */
+  --color-bg-card: #172232;          /* Neutral 900 */
+  --color-bg-subtle: #273445;        /* Neutral 800 */
+  --color-bg-sidebar: #0f1a2b;
+  --color-bg-input: #0b1422;
+
+  --color-border: #273445;
+  --color-border-strong: #3a495c;
+
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.3), 0 4px 16px rgb(0 0 0 / 0.25);
+  --shadow-pop: 0 12px 32px rgb(0 0 0 / 0.45);
+}
+
+/* ── Base ─────────────────────────────────────────────────────────────────── */
+
+@layer base {
+  html { color-scheme: light; }
+  [data-theme='dark'] { color-scheme: dark; }
+
+  body {
+    @apply bg-page font-sans text-sm text-body antialiased;
+    transition: background-color 0.2s, color 0.2s;
+  }
+
+  h1, h2, h3, h4 { @apply text-heading; letter-spacing: -0.01em; }
+
+  a { @apply text-primary; }
+  a:hover { @apply text-primary-hover; }
+
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-border-strong);
+    border-radius: 10px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+}
+
+/* ── Motion ───────────────────────────────────────────────────────────────── */
+
+@layer utilities {
+  .animate-enter { animation: enter 0.25s ease-out; }
+  .animate-pop { animation: pop 0.12s ease-out; }
+}
+
+@keyframes enter { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes pop { from { opacity: 0; transform: translateY(-4px) scale(0.98); } to { opacity: 1; transform: none; } }
