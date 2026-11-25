@@ -72,7 +72,9 @@ public static class DependencyInjection
                 options.Password.RequireNonAlphanumeric = false;
             })
             .AddRoles<IdentityRole>()
-            .AddEntityFrameworkStores<ApplicationDbContext>();
+            .AddEntityFrameworkStores<ApplicationDbContext>()
+            // Needed for admin password resets (a reset token is generated and used at once).
+            .AddDefaultTokenProviders();
 
         services.AddScoped<IIdentityService, IdentityService>();
         services.AddScoped<ITokenService, TokenService>();

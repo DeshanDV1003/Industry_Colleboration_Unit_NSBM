@@ -1,7 +1,7 @@
 import {
   Award, BadgeCheck, Building2, CalendarClock, Megaphone, BarChart3, Bot, Inbox, Trophy, CalendarDays, CalendarHeart, BookOpenCheck, Briefcase, CalendarCheck, ClipboardCheck, Compass, FileText, FolderKanban,
   Gauge, LayoutDashboard, ListChecks, Map, MessagesSquare, Mic, NotebookPen, Settings, ShieldCheck, Target,
-  UserSearch, Users, Wrench, type LucideIcon,
+  UserCog, UserSearch, Users, Wrench, type LucideIcon,
 } from 'lucide-react'
 import type { Role } from './roles'
 
@@ -105,6 +105,7 @@ export const NAVIGATION: Record<Role, NavSection[]> = {
     {
       title: 'Platform',
       items: [
+        { label: 'Users', to: '/users', icon: UserCog, ready: true },
         { label: 'Announcements', to: '/announcements', icon: Megaphone, ready: true },
         { label: 'Hall allocations', to: '/hall-bookings', icon: CalendarClock, ready: true },
         { label: 'Partner enquiries', to: '/partner-enquiries', icon: Inbox, ready: true },

@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
-import { ChevronDown, LogOut } from 'lucide-react'
+import { ChevronDown, KeyRound, LogOut } from 'lucide-react'
 import { Avatar } from '@/components/ui/Avatar'
 import { ROLE_META } from '@/config/roles'
-import { useCurrentUser, useSignOut } from '@/features/auth'
+import { ChangePasswordDialog, useCurrentUser, useSignOut } from '@/features/auth'
 import { useSession } from '@/stores/authStore'
 
 export function UserMenu() {
@@ -10,6 +10,7 @@ export function UserMenu() {
   const { data: me } = useCurrentUser()
   const signOut = useSignOut()
   const [open, setOpen] = useState(false)
+  const [changingPassword, setChangingPassword] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -48,6 +49,13 @@ export function UserMenu() {
           <div className="my-1 border-t border-line" />
           <button
             role="menuitem"
+            onClick={() => { setOpen(false); setChangingPassword(true) }}
+            className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-body hover:bg-surface-subtle hover:text-heading"
+          >
+            <KeyRound className="size-4" /> Change password
+          </button>
+          <button
+            role="menuitem"
             onClick={signOut}
             className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-body hover:bg-surface-subtle hover:text-heading"
           >
@@ -55,6 +63,7 @@ export function UserMenu() {
           </button>
         </div>
       )}
+      {changingPassword && <ChangePasswordDialog onClose={() => setChangingPassword(false)} />}
     </div>
   )
 }

@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
@@ -38,7 +39,9 @@ public static class PresentationServiceExtensions
 
         services
             .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(options => options.TokenValidationParameters = new TokenValidationParameters
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
             {
                 ValidateIssuer = true,
                 ValidateAudience = true,
@@ -48,6 +51,19 @@ public static class PresentationServiceExtensions
                 ValidAudience = jwt.Audience,
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.Secret)),
                 ClockSkew = TimeSpan.FromMinutes(1),
+            };
+
+                // A deactivated account loses access at once, not when its token expires.
+                options.Events = new JwtBearerEvents
+                {
+                    OnTokenValidated = async context =>
+                    {
+                        var userId = context.Principal?.FindFirstValue(ClaimTypes.NameIdentifier);
+                        var identity = context.HttpContext.RequestServices.GetRequiredService<IIdentityService>();
+                        if (userId is null || !await identity.IsActiveAsync(userId, context.HttpContext.RequestAborted))
+                            context.Fail("This account is no longer active.");
+                    },
+                };
             });
     }
 

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using NSBM.ICU.Application.Features.Auth.Commands.ChangePassword;
 using NSBM.ICU.Application.Features.Auth.Commands.DemoLogin;
 using NSBM.ICU.Application.Features.Auth.Commands.Login;
 using NSBM.ICU.Application.Features.Auth.Dtos;
@@ -24,4 +25,12 @@ public sealed class AuthController : ApiControllerBase
     [HttpGet("me")]
     public Task<CurrentUserDto> Me(CancellationToken ct) =>
         Mediator.Send(new GetCurrentUserQuery(), ct);
+
+    [Authorize]
+    [HttpPost("change-password")]
+    public async Task<IActionResult> ChangePassword(ChangePasswordCommand command, CancellationToken ct)
+    {
+        await Mediator.Send(command, ct);
+        return NoContent();
+    }
 }

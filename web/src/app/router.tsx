@@ -54,6 +54,7 @@ const ResearchPage = lazy(() => import('@/features/research/pages/ResearchPage')
 const SettingsPage = lazy(() => import('@/features/settings/pages/SettingsPage'))
 const HallBookingsPage = lazy(() => import('@/features/venues/pages/HallBookingsPage'))
 const VenuesPage = lazy(() => import('@/features/venues/pages/VenuesPage'))
+const UsersPage = lazy(() => import('@/features/users/pages/UsersPage'))
 const AnnouncementsPage = lazy(() => import('@/features/announcements/pages/AnnouncementsPage'))
 
 export const router = createBrowserRouter([
@@ -174,6 +175,7 @@ export const router = createBrowserRouter([
               { path: '/admin-events', element: <EventApprovalsPage /> },
               { path: '/partner-enquiries', element: <PartnerEnquiriesPage /> },
               { path: '/announcements', element: <AnnouncementsPage /> },
+              { path: '/users', element: <UsersPage /> },
               { path: '/settings', element: <SettingsPage /> },
             ],
           },

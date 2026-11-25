@@ -18,6 +18,28 @@ public sealed class PeopleSeeder(ApplicationDbContext db, UserManager<Applicatio
     public const string SerendibSoftwareLabs = "Serendib Software Labs";
     public const string CeylonQualityFirst = "Ceylon QualityFirst";
 
+    private const string SerendibPartnerEmail = "partner2@nsbm.demo";
+    private const string QualityFirstPartnerEmail = "partner3@nsbm.demo";
+
+    private static readonly (string StudentNo, string First, string Last, string Programme, int Year)[] Cohort =
+    [
+        ("DEMO-002", "Kavindi", "Perera", "BSc (Hons) Computer Science", 3),
+        ("DEMO-003", "Tharindu", "Silva", "BSc (Hons) Software Engineering", 2),
+        ("DEMO-004", "Amaya", "Jayawardena", "BSc (Hons) Computer Networks", 4),
+        ("DEMO-005", "Ravindu", "Bandara", "BSc (Hons) Software Engineering", 3),
+    ];
+
+    /// <summary>Every account this seeder creates. The demo reset removes any other account.</summary>
+    public static IReadOnlyList<string> SeededEmails { get; } =
+    [
+        .. DemoAccounts.All.Select(a => a.Email),
+        SerendibPartnerEmail,
+        QualityFirstPartnerEmail,
+        .. Cohort.Select(c => CohortEmail(c.StudentNo)),
+    ];
+
+    private static string CohortEmail(string studentNo) => $"{studentNo.ToLowerInvariant()}@nsbm.demo";
+
     private const string Department = "Department of Software Engineering and Computer Security";
     private const string CohortPassword = "Student@123";
     private const string PartnerPassword = "Industry@123";
@@ -48,22 +70,14 @@ public sealed class PeopleSeeder(ApplicationDbContext db, UserManager<Applicatio
         });
 
         await EnsureAsync(DemoAccounts.Industry, "Ishara", "Gunasekara", userId => NewPartner(userId, companies[LankaCloudWorks], "Engineering Manager"));
-        await EnsureAsync(Partner("partner2@nsbm.demo"), "Dilan", "Rajapaksha", userId => NewPartner(userId, companies[SerendibSoftwareLabs], "Senior Software Engineer"));
-        await EnsureAsync(Partner("partner3@nsbm.demo"), "Nethmi", "Senanayake", userId => NewPartner(userId, companies[CeylonQualityFirst], "QA Lead"));
+        await EnsureAsync(Partner(SerendibPartnerEmail), "Dilan", "Rajapaksha", userId => NewPartner(userId, companies[SerendibSoftwareLabs], "Senior Software Engineer"));
+        await EnsureAsync(Partner(QualityFirstPartnerEmail), "Nethmi", "Senanayake", userId => NewPartner(userId, companies[CeylonQualityFirst], "QA Lead"));
 
         await EnsureAsync(DemoAccounts.Student, "Sahan", "Fernando", userId => NewStudent(userId, "DEMO-001", "BSc (Hons) Software Engineering", 3));
 
-        var cohort = new[]
+        foreach (var (studentNo, first, last, programme, year) in Cohort)
         {
-            ("DEMO-002", "Kavindi", "Perera", "BSc (Hons) Computer Science", 3),
-            ("DEMO-003", "Tharindu", "Silva", "BSc (Hons) Software Engineering", 2),
-            ("DEMO-004", "Amaya", "Jayawardena", "BSc (Hons) Computer Networks", 4),
-            ("DEMO-005", "Ravindu", "Bandara", "BSc (Hons) Software Engineering", 3),
-        };
-
-        foreach (var (studentNo, first, last, programme, year) in cohort)
-        {
-            var account = new DemoAccounts.Account(Roles.Student, $"{studentNo.ToLowerInvariant()}@nsbm.demo", CohortPassword);
+            var account = new DemoAccounts.Account(Roles.Student, CohortEmail(studentNo), CohortPassword);
             await EnsureAsync(account, first, last, userId => NewStudent(userId, studentNo, programme, year));
         }
 

@@ -9,7 +9,7 @@ namespace NSBM.ICU.Infrastructure.Services;
 
 /// <summary>
 /// Clears every activity and partner-content table (children before parents), resets student choices and
-/// re-runs the content seeders. Accounts, companies and the catalogue are kept; venues return to the seeded list.
+/// re-runs the content seeders. Companies and the catalogue are kept; seeded accounts are reactivated, other accounts removed, and venues return to the seeded list.
 /// </summary>
 public sealed class DemoDataService(
     ApplicationDbContext db,
@@ -55,6 +55,11 @@ public sealed class DemoDataService(
         await db.InternshipApplications.ExecuteDeleteAsync(ct);
         await db.Vacancies.ExecuteDeleteAsync(ct);
         await db.IndustryTasks.ExecuteDeleteAsync(ct);
+        // Accounts the admin or the tests created go too (their activity was cleared above); seeded people are reactivated.
+        var seeded = PeopleSeeder.SeededEmails.Select(e => e.ToUpperInvariant()).ToList();
+        await db.Users.Where(u => !seeded.Contains(u.NormalizedEmail!)).ExecuteDeleteAsync(ct);
+        await db.Users.ExecuteUpdateAsync(u => u.SetProperty(x => x.IsActive, true), ct);
+
         await db.Students.ExecuteUpdateAsync(s => s
             .SetProperty(x => x.CareerPathId, (int?)null)
             .SetProperty(x => x.CareerPathSelectedAt, (DateTime?)null)

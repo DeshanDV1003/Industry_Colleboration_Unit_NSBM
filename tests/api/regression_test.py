@@ -141,6 +141,8 @@ READS = {
     f"/venues/bookings?from={TODAY.isoformat()}&to={(TODAY + datetime.timedelta(days=30)).isoformat()}": {"Registrar", "Admin"},
     "/venues/booking-options": {"Registrar"},
     "/announcements": {"Admin"},
+    "/users": {"Admin"},
+    "/users/options": {"Admin"},
 }
 for path, allowed in READS.items():
     for role, token in ROLE_TOKENS.items():
@@ -652,9 +654,100 @@ check("partners left out of a student announcement", not any(n["title"] == "Exam
 history = expect("announcement history", call("GET", "/announcements", adm), 200)
 check("history newest first with recipient counts", history[0]["title"] == "Exam timetable published" and history[1]["recipientCount"] > history[0]["recipientCount"] > 0, history)
 
+# ---------------------------------------------------------------- M16 user management
+section("M16 User management")
+run = str(int(time.time()))[-6:]   # accounts survive demo resets, so every run uses fresh e-mails and numbers
+users = expect("list users", call("GET", "/users", adm), 200)
+check("every role listed", {"Student", "Lecturer", "Industry", "Admin", "Registrar"} <= {u["role"] for u in users}, {u["role"] for u in users})
+check("student summary shows number and programme", any(u["summary"].startswith("DEMO-001 · BSc") for u in users))
+check("filter by role", all(u["role"] == "Lecturer" for u in call("GET", "/users?role=Lecturer", adm)[1]))
+check("search by student number", [u["fullName"] for u in call("GET", "/users?search=demo-003", adm)[1]] == ["Tharindu Silva"])
+uopts = expect("user options", call("GET", "/users/options", adm), 200)
+check("companies and programmes offered", len(uopts["companies"]) >= 3 and "BSc (Hons) Software Engineering" in uopts["programmes"], uopts)
+
+new_student = {"role": "Student", "email": f"new.student{run}@nsbm.demo", "password": "Welcome123",
+               "profile": {"firstName": "Nimal", "lastName": "Perera", "studentNo": f"t-{run}", "programme": "BSc (Hons) Software Engineering",
+                           "academicYear": 1, "batch": "2026.1"}}
+s_, b_ = call("POST", "/users", adm, dict(new_student, password="short"))
+check("weak password rejected on the field", s_ == 400 and "Password" in b_.get("errors", {}), (s_, b_))
+s_, b_ = call("POST", "/users", adm, dict(new_student, profile=dict(new_student["profile"], studentNo=None)))
+check("role fields required", s_ == 400 and "Profile.StudentNo" in b_.get("errors", {}), (s_, b_))
+expect("unknown role", call("POST", "/users", adm, dict(new_student, role="Wizard")), 400)
+expect("only admins create accounts", call("POST", "/users", reg, new_student), 403)
+s_, b_ = call("POST", "/users", adm, dict(new_student, email="student@nsbm.demo", profile=dict(new_student["profile"], studentNo=f"u-{run}")))
+check("duplicate e-mail on the Email field", s_ == 400 and "Email" in b_.get("errors", {}), (s_, b_))
+s_, b_ = call("POST", "/users", adm, dict(new_student, email=f"x{run}@nsbm.demo", profile=dict(new_student["profile"], studentNo="DEMO-001")))
+check("duplicate student number", s_ == 400 and "already in use" in str(b_), (s_, b_))
+check("failed creates leave no account behind", call("POST", "/auth/login", body={"email": f"x{run}@nsbm.demo", "password": "Welcome123"})[0] == 401)
+
+uid = expect("create student", call("POST", "/users", adm, new_student), 200)["userId"]
+nimal = login(new_student["email"], "Welcome123")
+me_ = call("GET", "/auth/me", nimal)[1]
+check("new student signs in with a profile", me_["role"] == "Student" and me_["headline"].startswith(f"T-{run}"), me_)
+detail = expect("open account", call("GET", f"/users/{uid}", adm), 200)
+check("detail round-trips", detail["profile"]["programme"] == "BSc (Hons) Software Engineering" and detail["isActive"], detail)
+
+lec_body = {"role": "Lecturer", "email": f"new.lecturer{run}@nsbm.demo", "password": "Welcome123",
+            "profile": {"firstName": "Ruwan", "lastName": "Dias", "staffNo": f"st-{run}", "designation": "Senior Lecturer", "department": "Computing"}}
+lid = expect("create lecturer", call("POST", "/users", adm, lec_body), 200)["userId"]
+partner_body = {"role": "Industry", "email": f"new.partner{run}@nsbm.demo", "password": "Welcome123",
+                "profile": {"firstName": "Sachini", "lastName": "Wijesinghe", "companyId": uopts["companies"][0]["id"], "jobTitle": "HR Partner"}}
+expect("create partner", call("POST", "/users", adm, partner_body), 200)
+expect("partner with unknown company", call("POST", "/users", adm, dict(partner_body, email=f"p2{run}@nsbm.demo", profile=dict(partner_body["profile"], companyId=999999))), 404)
+check("lecturer can sign in", call("GET", "/auth/me", login(lec_body["email"], "Welcome123"))[1]["role"] == "Lecturer")
+
+upd = {"role": "Student", "profile": dict(new_student["profile"], firstName="Nimali", academicYear=2)}
+expect("edit account", call("PUT", f"/users/{uid}", adm, upd), 204)
+check("profile and sign-in name updated", call("GET", f"/users/{uid}", adm)[1]["profile"]["academicYear"] == 2
+      and call("GET", "/auth/me", nimal)[1]["fullName"] == "Nimali Perera")
+expect("role cannot change", call("PUT", f"/users/{uid}", adm, {"role": "Lecturer", "profile": lec_body["profile"]}), 400)
+
+expect("deactivate", call("POST", f"/users/{uid}/deactivate", adm), 204)
+expect("open session stops working at once", call("GET", "/auth/me", nimal), 401)
+expect("deactivated account cannot sign in", call("POST", "/auth/login", body={"email": new_student["email"], "password": "Welcome123"}), 401)
+check("shown as inactive", next(u for u in call("GET", "/users", adm)[1] if u["userId"] == uid)["isActive"] is False)
+me_admin = call("GET", "/auth/me", adm)[1]
+s_, b_ = call("POST", f"/users/{me_admin['userId']}/deactivate", adm)
+check("admin cannot deactivate themself", s_ == 400 and "your own" in str(b_), (s_, b_))
+expect("reactivate", call("POST", f"/users/{uid}/activate", adm), 204)
+
+expect("reset password: weak", call("POST", f"/users/{uid}/reset-password", adm, {"newPassword": "abc"}), 400)
+expect("reset password", call("POST", f"/users/{uid}/reset-password", adm, {"newPassword": "Temporary9"}), 204)
+check("old password no longer works", call("POST", "/auth/login", body={"email": new_student["email"], "password": "Welcome123"})[0] == 401)
+nimal = login(new_student["email"], "Temporary9")
+s_, b_ = call("POST", "/auth/change-password", nimal, {"currentPassword": "wrong-one1", "newPassword": "MyOwnPass7"})
+check("wrong current password on its field", s_ == 400 and "CurrentPassword" in b_.get("errors", {}), (s_, b_))
+expect("same password again", call("POST", "/auth/change-password", nimal, {"currentPassword": "Temporary9", "newPassword": "Temporary9"}), 400)
+expect("change own password", call("POST", "/auth/change-password", nimal, {"currentPassword": "Temporary9", "newPassword": "MyOwnPass7"}), 204)
+login(new_student["email"], "MyOwnPass7")
+expect("change password needs sign-in", call("POST", "/auth/change-password", None, {"currentPassword": "a", "newPassword": "b"}), 401)
+
+csv = ("StudentNo,FirstName,LastName,Email,Programme,AcademicYear,Batch\n"
+       f"i1-{run},Ayesha,Fonseka,ayesha{run}@nsbm.demo,\"BSc (Hons) Computer Science\",1,2026.1\n"
+       f"i2-{run},Kasun,Rathnayake,kasun{run}@nsbm.demo,BSc (Hons) Computer Science,1,2026.1\n"
+       f"i3-{run},Bad,Year,bad{run}@nsbm.demo,BSc (Hons) Computer Science,nine,2026.1\n"
+       f"DEMO-001,Dup,Number,dup{run}@nsbm.demo,BSc (Hons) Computer Science,1,2026.1\n"
+       f"i2-{run},Twice,InFile,twice{run}@nsbm.demo,BSc (Hons) Computer Science,1,2026.1\n"
+       f"i6-{run},No,Mail,not-an-email,BSc (Hons) Computer Science,1,2026.1\n")
+s_, b_ = call("POST", "/users/import-students", adm, {"csv": "Name,Email\nA,b@c.d", "temporaryPassword": "Welcome123"})
+check("import needs the right header", s_ == 400 and "StudentNo" in str(b_), (s_, b_))
+result = expect("import students", call("POST", "/users/import-students", adm, {"csv": csv, "temporaryPassword": "Welcome123"}), 200)
+check("valid rows created", result["created"] == 2, result)
+rows = {e["row"]: e["message"] for e in result["errors"]}
+check("each bad row reported with its reason", set(rows) == {4, 5, 6, 7} and "AcademicYear" in rows[4] and "already in use" in rows[5]
+      and "more than once" in rows[6], rows)
+check("imported student signs in", call("GET", "/auth/me", login(f"ayesha{run}@nsbm.demo", "Welcome123"))[1]["role"] == "Student")
+expect("only admins import", call("POST", "/users/import-students", lec, {"csv": csv, "temporaryPassword": "Welcome123"}), 403)
+
+# Deactivated accounts stay out: clean up so later runs and demos see only active test accounts as inactive.
+for user_id in (uid, lid):
+    expect("deactivate test account", call("POST", f"/users/{user_id}/deactivate", adm), 204)
+
 # ---------------------------------------------------------------- restore
 section("Restore")
 expect("final demo reset", call("POST", "/settings/demo-reset", adm), 204)
+after_reset = call("GET", "/users", adm)[1]
+check("reset leaves only the seeded, active accounts", len(after_reset) == 11 and all(u["isActive"] for u in after_reset), [u["email"] for u in after_reset])
 
 # ---------------------------------------------------------------- report
 failed = [r for r in results if not r[1]]

@@ -13,6 +13,7 @@ const authApi = {
   login: (body: LoginRequest) => http.post<AuthResponse>('/auth/login', body).then((r) => r.data),
   demoLogin: (role: Role) => http.post<AuthResponse>('/auth/demo-login', { role }).then((r) => r.data),
   me: () => http.get<CurrentUser>('/auth/me').then((r) => r.data),
+  changePassword: (body: { currentPassword: string; newPassword: string }) => http.post('/auth/change-password', body),
 }
 
 /** Stores the new session, drops every cached query from a previous account and opens the dashboard. */
@@ -58,4 +59,8 @@ export function useSignOut() {
     queryClient.clear()
     navigate('/login', { replace: true })
   }
+}
+
+export function useChangePassword() {
+  return useMutation({ mutationFn: authApi.changePassword })
 }

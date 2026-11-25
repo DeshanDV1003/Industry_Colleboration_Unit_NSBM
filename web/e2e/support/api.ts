@@ -51,7 +51,7 @@ export async function apiAs<T = unknown>(account: AccountKey, method: 'GET' | 'P
   }
 }
 
-/** Restores the seeded demo data (accounts, companies and catalogue are kept). */
+/** Restores the seeded demo data, including the seeded accounts (accounts created by tests are removed). */
 export async function resetDemoData(): Promise<void> {
   await apiAs('admin', 'POST', 'settings/demo-reset')
 }

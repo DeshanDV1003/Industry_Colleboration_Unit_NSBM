@@ -41,7 +41,7 @@ function ResetCard() {
       <CardHeader title="Reset demo data" description="Restore the original fictional sample data." />
       <CardBody className="space-y-3 text-sm">
         <p>Removes all student activity (baselines, roadmap ticks, attempts, interviews, CVs, planners, applications), lecturer notes and assignments, mentor questions, and partner-created tasks and vacancies — then reloads the original demo tasks, vacancies and cohort.</p>
-        <p className="text-muted">Accounts, companies and the career catalogue are kept. This changes only demo records — it is not university-wide control.</p>
+        <p className="text-muted">Companies and the career catalogue are kept. The seeded demo accounts are reactivated and any other accounts are removed. This changes only demo records — it is not university-wide control.</p>
         <Button variant="danger" size="sm" onClick={() => setConfirming(true)}><RotateCcw className="size-4" /> Reset demo data</Button>
       </CardBody>
 
