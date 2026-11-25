@@ -61,5 +61,15 @@ public static class NotificationExtensions
             .Concat(calendarEvent.IsVisibleTo(Roles.Registrar, null) ? registrars : []);
     }
 
+    /// <summary>The first message a new account receives; it is also its welcome e-mail. It never contains the password.</summary>
+    public static void NotifyWelcome(this IApplicationDbContext db, string userId, string firstName, string email) =>
+        db.Notify(userId, NotificationKind.Welcome, "Welcome to the NSBM Industry Collaboration Unit",
+            $"Hello {firstName}, your account is ready. Sign in with {email} and the temporary password the Unit gave you, then change it from the user menu.",
+            NotificationLinks.Dashboard, DateTime.UtcNow);
+
+    /// <summary>An account security alert. These are always e-mailed, even to people who turned e-mail updates off.</summary>
+    public static void NotifySecurity(this IApplicationDbContext db, string userId, string title, string body) =>
+        db.Notify(userId, NotificationKind.AccountSecurity, title, body, NotificationLinks.MySettings, DateTime.UtcNow);
+
     private static string Truncate(string text, int max) => text.Length <= max ? text : text[..(max - 1)] + "…";
 }

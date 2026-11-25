@@ -56,6 +56,7 @@ const HallBookingsPage = lazy(() => import('@/features/venues/pages/HallBookings
 const VenuesPage = lazy(() => import('@/features/venues/pages/VenuesPage'))
 const ReportsPage = lazy(() => import('@/features/reports/pages/ReportsPage'))
 const AuditLogPage = lazy(() => import('@/features/audit/pages/AuditLogPage'))
+const MySettingsPage = lazy(() => import('@/features/my-settings/pages/MySettingsPage'))
 const UsersPage = lazy(() => import('@/features/users/pages/UsersPage'))
 const AnnouncementsPage = lazy(() => import('@/features/announcements/pages/AnnouncementsPage'))
 
@@ -104,6 +105,7 @@ export const router = createBrowserRouter([
           { path: '/dashboard', element: <DashboardPage /> },
           { path: '/calendar', element: <CalendarPage /> },
           { path: '/notifications', element: <NotificationsPage /> },
+          { path: '/my-settings', element: <MySettingsPage /> },
           {
             element: <RequireRole roles={['Student']} />,
             children: [

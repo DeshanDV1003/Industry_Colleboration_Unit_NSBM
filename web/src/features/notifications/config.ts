@@ -1,5 +1,5 @@
 import {
-  Award, BadgeCheck, CalendarClock, CalendarX, DoorOpen, Megaphone, Briefcase, CalendarHeart, Inbox, CalendarDays, ClipboardCheck, Compass, Gauge, Map, MessageSquareText, MessagesSquare,
+  Award, BadgeCheck, Hand, ShieldAlert, CalendarClock, CalendarX, DoorOpen, Megaphone, Briefcase, CalendarHeart, Inbox, CalendarDays, ClipboardCheck, Compass, Gauge, Map, MessageSquareText, MessagesSquare,
   NotebookPen, ShieldCheck, Wrench, type LucideIcon,
 } from 'lucide-react'
 import type { NextStep, NotificationKind } from './types'
@@ -22,6 +22,8 @@ export const NOTIFICATION_ICON: Record<NotificationKind, LucideIcon> = {
   HallBookingCancelled: CalendarX,
   Announcement: Megaphone,
   HallNeeded: CalendarClock,
+  Welcome: Hand,
+  AccountSecurity: ShieldAlert,
 }
 
 interface StepView { icon: LucideIcon; text: string; to: string }

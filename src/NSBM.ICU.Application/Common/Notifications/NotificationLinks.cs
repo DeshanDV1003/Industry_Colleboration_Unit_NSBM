@@ -22,6 +22,8 @@ public static class NotificationLinks
     public const string PartnerEnquiries = "/partner-enquiries";
     public const string HallBookings = "/hall-bookings";
     public const string Notifications = "/notifications";
+    public const string Dashboard = "/dashboard";
+    public const string MySettings = "/my-settings";
 
     public static string Task(int taskId) => $"/tasks/{taskId}";
     public static string Event(int eventId) => $"/events/{eventId}";

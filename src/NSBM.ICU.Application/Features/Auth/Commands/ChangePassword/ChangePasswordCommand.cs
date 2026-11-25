@@ -3,6 +3,7 @@ using MediatR;
 using NSBM.ICU.Application.Common.Auditing;
 using NSBM.ICU.Application.Common.Exceptions;
 using NSBM.ICU.Application.Common.Interfaces;
+using NSBM.ICU.Application.Common.Notifications;
 using NSBM.ICU.Application.Common.Validation;
 using NSBM.ICU.Application.Features.Users;
 using NSBM.ICU.Domain.Enums;
@@ -30,6 +31,8 @@ public sealed class ChangePasswordCommandHandler(IApplicationDbContext db, IIden
         var userId = currentUser.UserId ?? throw new AuthenticationFailedException("You are not signed in.");
         var email = (await db.RequireAsync(userId, ct)).Email;
         await audit.RecordAsync(AuditCategory.Accounts, AuditActions.PasswordChanged, "Changed their own password", "User", email, ct);
+        db.NotifySecurity(userId, "Your password was changed",
+            "The password for your account was just changed. If this was not you, contact the Industry Collaboration Unit straight away.");
         await identity.ChangePasswordAsync(userId, request.CurrentPassword, request.NewPassword, ct);
         await db.SaveChangesAsync(ct);
     }

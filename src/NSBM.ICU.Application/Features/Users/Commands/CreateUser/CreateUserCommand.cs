@@ -3,6 +3,7 @@ using MediatR;
 using NSBM.ICU.Application.Common.Auditing;
 using NSBM.ICU.Application.Common.Interfaces;
 using NSBM.ICU.Application.Common.Models;
+using NSBM.ICU.Application.Common.Notifications;
 using NSBM.ICU.Application.Common.Validation;
 using NSBM.ICU.Application.Features.Users.Models;
 using NSBM.ICU.Domain.Constants;
@@ -38,6 +39,9 @@ public sealed class CreateUserCommandHandler(IApplicationDbContext db, IIdentity
         // Added before the account is created, so it commits in the same transaction (and not at all if creation fails).
         await audit.RecordAsync(AuditCategory.Accounts, AuditActions.UserCreated,
             $"Created a {request.Role} account for {profile.FullName} ({account.Email})", "User", account.Email, ct);
-        return await identity.CreateAccountAsync(account, profile, ct);
+        var userId = await identity.CreateAccountAsync(account, profile, ct);
+        db.NotifyWelcome(userId, profile.FirstName, account.Email);
+        await db.SaveChangesAsync(ct);
+        return userId;
     }
 }

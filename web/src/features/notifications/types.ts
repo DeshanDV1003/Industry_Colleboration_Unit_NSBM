@@ -5,7 +5,7 @@ export type NotificationKind =
   | 'ApplicationUpdate' | 'MentorReply' | 'TaskReview' | 'LecturerNote'
   | 'TaskAssigned' | 'ContentReviewed' | 'ContentSubmitted' | 'CalendarEvent'
   | 'IndustryEvent' | 'CertificateIssued' | 'BadgeRequested' | 'BadgeReviewed' | 'PartnerEnquiry'
-  | 'HallAssigned' | 'HallBookingCancelled' | 'Announcement' | 'HallNeeded'
+  | 'HallAssigned' | 'HallBookingCancelled' | 'Announcement' | 'HallNeeded' | 'Welcome' | 'AccountSecurity'
 
 /** Mirrors Features/Notifications/Dtos/NotificationDto. */
 export interface AppNotification {

@@ -30,6 +30,10 @@ origin is configured.
 | `Bootstrap__AdminEmail`, `__AdminPassword`, `__AdminFirstName`, `__AdminLastName` | first start only | Creates the first Unit admin when the database has none. Remove them afterwards. |
 | `Demo__Enabled` | no (default `false`) | `true` loads fictional demo people and records, demo sign-in and demo reset. Never on a real deployment. |
 | `Anthropic__ApiKey` | no | Turns on the AI interviewer. Without it the feature says it is unavailable. |
+| `Email__Mode` | no (default `Off`) | `Smtp` to send e-mail. Notifications always stay in the app. |
+| `Email__AppBaseUrl` | with e-mail | The public address of the web app; every link in an e-mail starts with it. |
+| `Email__FromAddress`, `Email__FromName` | with e-mail | The sender people see. Use an address your mail server may send as. |
+| `Email__Smtp__Host`, `__Port`, `__Username`, `__Password`, `__Security` | with e-mail | The SMTP relay (e.g. the university's). `Security`: `StartTls` (587, default), `SslOnConnect` (465) or `None`. |
 
 The web build reads `VITE_DEMO_MODE` (default `false` for production builds) and `VITE_FACE_MODEL_URL`
 (optional self-hosted camera-coaching model).
@@ -46,7 +50,7 @@ Then:
 
 1. Open `http://<server>:8080` (or your HTTPS address) and sign in as the bootstrap admin.
 2. Remove the `BOOTSTRAP_ADMIN_*` values from `.env` and run `docker compose up -d` again.
-3. Change the admin's password from the user menu.
+3. Change the admin's password from the user menu. If e-mail is on, use **Settings → Send test e-mail** to check delivery.
 4. From **Users**, create the Assistant Registrar, lecturers and partner contacts, and import each student
    cohort from CSV. The registrar adds the real lecture halls and event halls under **Venues**.
 

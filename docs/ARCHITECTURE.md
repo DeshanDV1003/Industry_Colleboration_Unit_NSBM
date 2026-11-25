@@ -248,6 +248,7 @@ Logo files live in `web/public/brand/`.
 | 17 | Reports & exports: hall timetable (admin, registrar), event attendance and internship applications (admin), student participation as counts, never a ranking (admin, lecturers). Each report is one `ReportTable` served as JSON for preview and printing (save as PDF from the print dialog) or as a typed, filterable Excel file (`IReportFileWriter`, ClosedXML) — **done** |
 | 18 | Audit log: `IAuditTrail` records approvals, account changes, password resets (never the password), hall allocations, announcements, calendar changes, partner application decisions, certificates and demo resets in the same save as the change; append-only (no edit/delete endpoint, kept through demo resets); admin page with area, search (incl. account e-mail), date filters, paging and Excel export — **done** |
 | 19 | Deployment readiness: no secrets in committed settings (environment / user-secrets), the API refuses unsafe settings at start-up, real deployments seed no demo data and get their first admin from Bootstrap settings, UTC timestamps sent with `Z`, forwarded-headers support for the rate limiter, `/health/live` and `/health/ready`, security headers and HSTS, demo UI compiled out of production builds, Dockerfiles + docker-compose (SQL Server, API, nginx web) and [DEPLOYMENT.md](DEPLOYMENT.md) — **done** |
+| 20 | E-mail notifications: a background `EmailDispatcher` treats the notifications table as an outbox (only committed notifications are e-mailed, one batched e-mail per person per cycle, failed sends retried), weekly digest on Monday mornings (Asia/Colombo), welcome e-mail for new accounts (never the password), security alerts always sent, calendar broadcasts kept in-app, per-person opt-out on a new My settings page, admin test e-mail. Senders: SMTP (MailKit), File (.eml inbox under `App_Data/mail` in development) or Off — **done** |
 
 ## 7. Responsible-use principles (from the guide)
 
@@ -278,6 +279,8 @@ uses a SQL login instead, keep that connection string out of the repository with
 ```
 dotnet user-secrets set "ConnectionStrings:DefaultConnection" "<connection string>" --project src/NSBM.ICU.API
 ```
+
+In development, e-mails are written as `.eml` files to `src/NSBM.ICU.API/App_Data/mail` (open them in Outlook or any mail app); nothing is sent.
 
 Always start the API with the `http` launch profile (as above). `dotnet run --environment ...` does not set the
 ASP.NET environment on the .NET 10 SDK. Deploying to a server: see [DEPLOYMENT.md](DEPLOYMENT.md).

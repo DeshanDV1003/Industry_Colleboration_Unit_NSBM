@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NSBM.ICU.Application.Features.Settings.Commands.ResetDemoData;
+using NSBM.ICU.Application.Features.Settings.Commands.SendTestEmail;
 using NSBM.ICU.Application.Features.Settings.Commands.UpdateAdminProfile;
 using NSBM.ICU.Domain.Constants;
 
@@ -23,4 +24,9 @@ public sealed class SettingsController : ApiControllerBase
         await Mediator.Send(new ResetDemoDataCommand(), ct);
         return NoContent();
     }
+
+    /// <summary>Sends a test e-mail to the signed-in admin, to check the e-mail settings after a deployment.</summary>
+    [HttpPost("test-email")]
+    public async Task<IActionResult> TestEmail(CancellationToken ct) =>
+        Ok(new { sentTo = await Mediator.Send(new SendTestEmailCommand(), ct) });
 }

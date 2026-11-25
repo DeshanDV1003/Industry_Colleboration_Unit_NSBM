@@ -69,6 +69,7 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
     public DbSet<CalendarEvent> CalendarEvents => Set<CalendarEvent>();
     public DbSet<Notification> Notifications => Set<Notification>();
     public DbSet<Announcement> Announcements => Set<Announcement>();
+    public DbSet<EmailPreference> EmailPreferences => Set<EmailPreference>();
     public DbSet<AuditEntry> AuditEntries => Set<AuditEntry>();
     public DbSet<Venue> Venues => Set<Venue>();
     public DbSet<VenueBooking> VenueBookings => Set<VenueBooking>();

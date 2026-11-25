@@ -39,6 +39,13 @@ services:
       Bootstrap__AdminFirstName: ${BOOTSTRAP_ADMIN_FIRST_NAME:-}
       Bootstrap__AdminLastName: ${BOOTSTRAP_ADMIN_LAST_NAME:-}
       Anthropic__ApiKey: ${ANTHROPIC_API_KEY:-}
+      Email__Mode: ${EMAIL_MODE:-Off}
+      Email__AppBaseUrl: ${PUBLIC_URL:-}
+      Email__FromAddress: ${EMAIL_FROM:-no-reply@nsbm.ac.lk}
+      Email__Smtp__Host: ${SMTP_HOST:-}
+      Email__Smtp__Port: ${SMTP_PORT:-587}
+      Email__Smtp__Username: ${SMTP_USERNAME:-}
+      Email__Smtp__Password: ${SMTP_PASSWORD:-}
     restart: unless-stopped
     networks: [icu]
 

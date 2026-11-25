@@ -24,3 +24,6 @@ web/e2e-results/
 
 # Deployment secrets (see .env.example)
 /.env
+
+# Development e-mail inbox (.eml files written in Email:Mode=File)
+src/NSBM.ICU.API/App_Data/

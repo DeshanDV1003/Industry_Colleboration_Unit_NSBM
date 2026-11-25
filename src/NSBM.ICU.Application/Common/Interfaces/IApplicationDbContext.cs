@@ -85,6 +85,7 @@ public interface IApplicationDbContext
     // Notifications
     DbSet<Notification> Notifications { get; }
     DbSet<Announcement> Announcements { get; }
+    DbSet<EmailPreference> EmailPreferences { get; }
 
     // Accountability
     DbSet<AuditEntry> AuditEntries { get; }

@@ -17,6 +17,8 @@ public sealed class NotificationConfiguration : IEntityTypeConfiguration<Notific
         builder.Property(x => x.Link).HasMaxLength(200);
         builder.Ignore(x => x.IsRead);
         builder.HasIndex(x => new { x.RecipientUserId, x.ReadAt, x.CreatedAt });
+        // The e-mail sender looks for notifications it has not dealt with yet.
+        builder.HasIndex(x => new { x.EmailHandledAt, x.CreatedAt });
         builder.HasOne<ApplicationUser>().WithMany().HasForeignKey(x => x.RecipientUserId).OnDelete(DeleteBehavior.Cascade);
     }
 }

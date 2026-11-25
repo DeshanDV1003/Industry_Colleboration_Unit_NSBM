@@ -11,6 +11,7 @@ import { useCurrentUser } from '@/features/auth'
 import { cn } from '@/lib/cn'
 import { getErrorMessage } from '@/lib/http'
 import { useResetDemoData, useUpdateAdminProfile } from '../api/settingsApi'
+import { TestEmailCard } from '../components/TestEmailCard'
 
 function ProfileCard({ initial }: { initial: string }) {
   const [designation, setDesignation] = useState(initial)
@@ -72,9 +73,10 @@ export default function SettingsPage() {
 
   return (
     <>
-      <PageHeader title="Demo settings" description="Update the demo profile or restore the original demo data." />
+      <PageHeader title="Settings" description="Your admin profile, e-mail delivery and the demo data." />
       <div className="grid max-w-5xl gap-6 lg:grid-cols-2">
         {me && <ProfileCard key={me.headline} initial={me.headline ?? ''} />}
+        <TestEmailCard />
         <ResetCard />
       </div>
     </>

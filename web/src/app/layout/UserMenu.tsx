@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import { ChevronDown, KeyRound, LogOut } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { ChevronDown, KeyRound, LogOut, Settings } from 'lucide-react'
 import { Avatar } from '@/components/ui/Avatar'
 import { ROLE_META } from '@/config/roles'
 import { ChangePasswordDialog, useCurrentUser, useSignOut } from '@/features/auth'
@@ -47,6 +48,14 @@ export function UserMenu() {
             {me?.organisation && <p className="text-xs text-muted">{me.organisation}</p>}
           </div>
           <div className="my-1 border-t border-line" />
+          <Link
+            role="menuitem"
+            to="/my-settings"
+            onClick={() => setOpen(false)}
+            className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-body hover:bg-surface-subtle hover:text-heading"
+          >
+            <Settings className="size-4" /> My settings
+          </Link>
           <button
             role="menuitem"
             onClick={() => { setOpen(false); setChangingPassword(true) }}

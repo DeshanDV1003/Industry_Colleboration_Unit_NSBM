@@ -62,6 +62,9 @@ def section(title):
 import time
 import io
 import zipfile
+import email
+import email.policy
+import pathlib
 for _ in range(60):  # wait for a freshly started API
     try:
         if call("GET", "/skills")[0] == 401:
@@ -152,6 +155,7 @@ READS = {
     f"/reports/applications?from={(TODAY - datetime.timedelta(days=90)).isoformat()}&to={TODAY.isoformat()}": {"Admin"},
     "/reports/student-participation": {"Admin", "Lecturer"},
     "/audit": {"Admin"},
+    "/me/email-preferences": ALL_ROLES,
 }
 for path, allowed in READS.items():
     for role, token in ROLE_TOKENS.items():
@@ -857,10 +861,75 @@ status, ctype, disposition, content = download(f"/audit/export?category=Halls", 
 check("audit export is a real workbook", status == 200 and "audit-log-" in disposition and is_xlsx(content, "Audit log", "What happened", "hall.allocated"), disposition)
 expect("registrar cannot read the audit log", call("GET", "/audit/export", reg), 403)
 
+# ---------------------------------------------------------------- M20 e-mail notifications
+section("M20 E-mail notifications (development inbox folder)")
+MAIL_DIR = pathlib.Path(__file__).resolve().parents[2] / "src" / "NSBM.ICU.API" / "App_Data" / "mail"
+
+def inbox(to, *, since):
+    """Decoded e-mails to one address written after `since` (a set of file names seen before)."""
+    found = []
+    for path in sorted(MAIL_DIR.glob("*.eml")) if MAIL_DIR.exists() else []:
+        if path.name in since:
+            continue
+        message = email.message_from_bytes(path.read_bytes(), policy=email.policy.default)
+        if to.lower() in str(message["To"]).lower():
+            text = message.get_body(preferencelist=("plain",)).get_content()
+            html = message.get_body(preferencelist=("html",)).get_content()
+            found.append({"subject": str(message["Subject"]), "text": text, "html": html})
+    return found
+
+def wait_for(to, since, predicate, seconds=30):
+    for _ in range(seconds):
+        mails = [m for m in inbox(to, since=since) if predicate(m)]
+        if mails:
+            return mails
+        time.sleep(1)
+    return []
+
+seen = {p.name for p in MAIL_DIR.glob("*.eml")} if MAIL_DIR.exists() else set()
+prefs = expect("my e-mail preferences", call("GET", "/me/email-preferences", kav), 200)
+check("everything on by default, e-mail enabled here", prefs == {"notificationsByEmail": True, "weeklyDigestByEmail": True, "emailEnabled": True}, prefs)
+expect("Kavindi turns e-mail updates off", call("PUT", "/me/email-preferences", kav, {"notificationsByEmail": False, "weeklyDigestByEmail": True}), 204)
+check("choice saved", call("GET", "/me/email-preferences", kav)[1]["notificationsByEmail"] is False)
+
+notice = f"Library hours change {run}"
+expect("announce to students", call("POST", "/announcements", adm, {"audience": "Students", "title": notice, "message": "The library closes at 6 pm this week."}), 200)
+sahan_mail = wait_for("student@nsbm.demo", seen, lambda m: notice in m["subject"] or notice in m["text"])
+check("student receives the announcement by e-mail", sahan_mail, sorted(p.name for p in MAIL_DIR.glob("*.eml"))[-3:] if MAIL_DIR.exists() else "no mail folder")
+if sahan_mail:
+    m = sahan_mail[0]
+    check("e-mail greets by name and links into the platform", "Hello Sahan Fernando" in m["text"] and "http://localhost:5301/notifications" in m["text"], m["text"][:300])
+    check("HTML version carries the same content", notice in m["html"] and "Open the platform" in m["html"])
+check("a student who opted out gets no update e-mail", not inbox("demo-002@nsbm.demo", since=seen))
+
+kav_id = next(u["userId"] for u in call("GET", "/users?search=demo-002", adm)[1])
+expect("admin resets Kavindi's password", call("POST", f"/users/{kav_id}/reset-password", adm, {"newPassword": "Student@123"}), 204)
+check("security alert is e-mailed even after opting out", wait_for("demo-002@nsbm.demo", seen, lambda m: "password was reset" in m["text"]))
+
+welcome_email = f"welcome{run}@nsbm.demo"
+expect("create an account", call("POST", "/users", adm, {"role": "Lecturer", "email": welcome_email, "password": "Welcome123",
+       "profile": {"firstName": "Malith", "lastName": "Perera", "staffNo": f"w-{run}", "designation": "Lecturer", "department": "Computing"}}), 200)
+welcome = wait_for(welcome_email, seen, lambda m: "Welcome" in m["subject"])
+check("new account gets a welcome e-mail", welcome)
+check("the welcome e-mail never contains the password", welcome and "Welcome123" not in welcome[0]["text"] and "Welcome123" not in welcome[0]["html"])
+
+calendar_title = f"Mock interview week {run}"
+expect("plan a student calendar event", call("POST", "/calendar/events", adm, {"title": calendar_title, "type": "Programme", "audience": "Students",
+       "startDate": future, "endDate": future, "description": None, "location": None, "careerPathId": None, "industryTaskId": None, "vacancyId": None}), 200)
+time.sleep(12)
+check("calendar broadcasts stay in the app (no e-mail)", not any(calendar_title in m["text"] for m in inbox("student@nsbm.demo", since=seen)))
+check("but still appear in the app", any(calendar_title in n["title"] for n in call("GET", "/me/notifications", stu)[1]["items"]))
+
+sent = expect("admin sends a test e-mail", call("POST", "/settings/test-email", adm), 200)
+check("test e-mail goes to the admin", sent["sentTo"] == "icu.head@nsbm.demo" and inbox("icu.head@nsbm.demo", since=seen) and
+      any("Test e-mail" in m["subject"] for m in inbox("icu.head@nsbm.demo", since=seen)))
+expect("only admins send test e-mails", call("POST", "/settings/test-email", reg), 403)
+
 # ---------------------------------------------------------------- restore
 section("Restore")
 expect("final demo reset", call("POST", "/settings/demo-reset", adm), 204)
 check("demo reset keeps the audit log", call("GET", "/audit", adm)[1]["total"] > log["total"])
+check("demo reset restores default e-mail choices", call("GET", "/me/email-preferences", kav)[1]["notificationsByEmail"] is True)
 after_reset = call("GET", "/users", adm)[1]
 check("reset leaves only the seeded, active accounts", len(after_reset) == 11 and all(u["isActive"] for u in after_reset), [u["email"] for u in after_reset])
 

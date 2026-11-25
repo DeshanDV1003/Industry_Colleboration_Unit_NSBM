@@ -52,6 +52,7 @@ public sealed class DatabaseSeeder(
             await achievements.SeedAsync(cancellationToken);
             await calendar.SeedAsync(cancellationToken);
             await venues.SeedAsync(cancellationToken);
+            await db.MarkSeededNotificationsEmailedAsync(cancellationToken);
         }
 
         await bootstrapAdmin.SeedAsync(cancellationToken);

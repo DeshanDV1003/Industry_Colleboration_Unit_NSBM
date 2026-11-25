@@ -30,6 +30,7 @@ public sealed class DemoDataService(
 
         await db.Notifications.ExecuteDeleteAsync(ct);
         await db.Announcements.ExecuteDeleteAsync(ct);
+        await db.EmailPreferences.ExecuteDeleteAsync(ct);
         await db.VenueBookings.ExecuteDeleteAsync(ct);
         await db.Venues.ExecuteDeleteAsync(ct);
         await db.PartnerEnquiries.ExecuteDeleteAsync(ct);
@@ -75,6 +76,7 @@ public sealed class DemoDataService(
         await achievements.SeedAsync(ct);
         await calendar.SeedAsync(ct);
         await venues.SeedAsync(ct);
+        await db.MarkSeededNotificationsEmailedAsync(ct);
 
         await transaction.CommitAsync(ct);
     }

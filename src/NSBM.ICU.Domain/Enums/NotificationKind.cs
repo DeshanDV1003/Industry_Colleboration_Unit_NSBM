@@ -20,4 +20,6 @@ public enum NotificationKind
     HallBookingCancelled = 15,
     Announcement = 16,
     HallNeeded = 17,
+    Welcome = 18,
+    AccountSecurity = 19,
 }

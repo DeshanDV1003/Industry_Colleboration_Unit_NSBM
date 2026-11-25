@@ -1273,6 +1273,26 @@ namespace NSBM.ICU.Infrastructure.Persistence.Migrations
                     b.ToTable("Announcements", (string)null);
                 });
 
+            modelBuilder.Entity("NSBM.ICU.Domain.Entities.Notifications.EmailPreference", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime?>("LastDigestSentAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("NotificationsByEmail")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("WeeklyDigestByEmail")
+                        .HasColumnType("bit");
+
+                    b.HasKey("UserId");
+
+                    b.ToTable("EmailPreferences", (string)null);
+                });
+
             modelBuilder.Entity("NSBM.ICU.Domain.Entities.Notifications.Notification", b =>
                 {
                     b.Property<int>("Id")
@@ -1287,6 +1307,9 @@ namespace NSBM.ICU.Infrastructure.Persistence.Migrations
                         .HasColumnType("nvarchar(500)");
 
                     b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("EmailHandledAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Kind")
@@ -1312,6 +1335,8 @@ namespace NSBM.ICU.Infrastructure.Persistence.Migrations
                         .HasColumnType("nvarchar(150)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("EmailHandledAt", "CreatedAt");
 
                     b.HasIndex("RecipientUserId", "ReadAt", "CreatedAt");
 
@@ -3100,6 +3125,15 @@ namespace NSBM.ICU.Infrastructure.Persistence.Migrations
                     b.Navigation("CareerPath");
 
                     b.Navigation("Student");
+                });
+
+            modelBuilder.Entity("NSBM.ICU.Domain.Entities.Notifications.EmailPreference", b =>
+                {
+                    b.HasOne("NSBM.ICU.Infrastructure.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("NSBM.ICU.Domain.Entities.Notifications.Notification", b =>

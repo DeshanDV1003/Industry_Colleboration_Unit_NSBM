@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using NSBM.ICU.Application.Common.Auditing;
 using NSBM.ICU.Application.Common.Interfaces;
 using NSBM.ICU.Infrastructure.Ai;
+using NSBM.ICU.Infrastructure.Email;
 using NSBM.ICU.Infrastructure.Identity;
 using NSBM.ICU.Infrastructure.Persistence;
 using NSBM.ICU.Infrastructure.Persistence.Interceptors;
@@ -23,6 +24,7 @@ public static class DependencyInjection
         services.AddSingleton<IDateTime, DateTimeService>();
         services.AddSingleton<IReportFileWriter, ExcelReportWriter>();
         services.AddAiServices(configuration);
+        services.AddEmail(configuration);
         return services;
     }
 
@@ -85,5 +87,22 @@ public static class DependencyInjection
 
         services.AddScoped<IIdentityService, IdentityService>();
         services.AddScoped<ITokenService, TokenService>();
+    }
+
+    /// <summary>Email__Mode chooses the sender: Off (default), File (development inbox folder) or Smtp.</summary>
+    private static void AddEmail(this IServiceCollection services, IConfiguration configuration)
+    {
+        var section = configuration.GetSection(EmailOptions.SectionName);
+        services.Configure<EmailOptions>(section);
+        services.AddSingleton<IEmailLinks, EmailLinks>();
+
+        switch (section.GetValue<EmailMode>(nameof(EmailOptions.Mode)))
+        {
+            case EmailMode.Smtp: services.AddSingleton<IEmailSender, SmtpEmailSender>(); break;
+            case EmailMode.File: services.AddSingleton<IEmailSender, FileEmailSender>(); break;
+            default: services.AddSingleton<IEmailSender, DisabledEmailSender>(); break;
+        }
+
+        services.AddHostedService<EmailDispatcher>();
     }
 }
