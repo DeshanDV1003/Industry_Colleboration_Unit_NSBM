@@ -1,6 +1,7 @@
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using NSBM.ICU.Application.Common.Auditing;
 using NSBM.ICU.Application.Common.Exceptions;
 using NSBM.ICU.Application.Common.Extensions;
 using NSBM.ICU.Application.Common.Interfaces;
@@ -22,7 +23,7 @@ public sealed class UpdateApplicationStatusCommandValidator : AbstractValidator<
     }
 }
 
-public sealed class UpdateApplicationStatusCommandHandler(IApplicationDbContext db, ICurrentUser currentUser, IDateTime clock)
+public sealed class UpdateApplicationStatusCommandHandler(IApplicationDbContext db, ICurrentUser currentUser, IDateTime clock, IAuditTrail audit)
     : IRequestHandler<UpdateApplicationStatusCommand>
 {
     public async Task Handle(UpdateApplicationStatusCommand request, CancellationToken cancellationToken)
@@ -44,6 +45,10 @@ public sealed class UpdateApplicationStatusCommandHandler(IApplicationDbContext 
             $"Application update: {application.Vacancy.Title}",
             $"{companyName} moved your application to \"{StatusText(request.Status)}\".",
             NotificationLinks.Applications, clock.UtcNow);
+        var student = await db.Students.Where(s => s.Id == application.StudentId).Select(s => s.FirstName + " " + s.LastName).SingleAsync(cancellationToken);
+        await audit.RecordAsync(AuditCategory.Applications, AuditActions.ApplicationStatusChanged,
+            $"Moved {student}'s application for \"{application.Vacancy.Title}\" to \"{StatusText(request.Status)}\"",
+            "InternshipApplication", application.Id.ToString(), cancellationToken);
         await db.SaveChangesAsync(cancellationToken);
     }
 

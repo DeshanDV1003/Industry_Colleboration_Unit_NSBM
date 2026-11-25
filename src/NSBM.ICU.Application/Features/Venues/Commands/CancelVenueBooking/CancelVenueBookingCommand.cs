@@ -1,5 +1,6 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using NSBM.ICU.Application.Common.Auditing;
 using NSBM.ICU.Application.Common.Exceptions;
 using NSBM.ICU.Application.Common.Extensions;
 using NSBM.ICU.Application.Common.Interfaces;
@@ -10,7 +11,7 @@ namespace NSBM.ICU.Application.Features.Venues.Commands.CancelVenueBooking;
 /// <summary>Frees a hall and tells everyone who was told about it. Past bookings are kept as a record.</summary>
 public sealed record CancelVenueBookingCommand(int Id) : IRequest;
 
-public sealed class CancelVenueBookingCommandHandler(IApplicationDbContext db, ICurrentUser currentUser, IDateTime clock) : IRequestHandler<CancelVenueBookingCommand>
+public sealed class CancelVenueBookingCommandHandler(IApplicationDbContext db, ICurrentUser currentUser, IDateTime clock, IAuditTrail audit) : IRequestHandler<CancelVenueBookingCommand>
 {
     public async Task Handle(CancelVenueBookingCommand request, CancellationToken ct)
     {
@@ -26,6 +27,9 @@ public sealed class CancelVenueBookingCommandHandler(IApplicationDbContext db, I
             $"{booking.Venue!.DisplayName} is no longer booked on {booking.Date:ddd d MMM yyyy}, {booking.StartTime:HH\\:mm}–{booking.EndTime:HH\\:mm}.",
             clock.UtcNow);
 
+        await audit.RecordAsync(AuditCategory.Halls, AuditActions.HallCancelled,
+            $"Cancelled {booking.Venue.DisplayName} for {booking.Title} on {booking.Date:ddd d MMM yyyy}, {booking.StartTime:HH\\:mm}–{booking.EndTime:HH\\:mm}",
+            "Venue", booking.VenueId.ToString(), ct);
         db.VenueBookings.Remove(booking);
         await db.SaveChangesAsync(ct);
     }

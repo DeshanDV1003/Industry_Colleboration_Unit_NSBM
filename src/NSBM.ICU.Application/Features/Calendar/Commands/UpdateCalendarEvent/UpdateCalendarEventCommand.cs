@@ -1,10 +1,12 @@
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using NSBM.ICU.Application.Common.Auditing;
 using NSBM.ICU.Application.Common.Exceptions;
 using NSBM.ICU.Application.Common.Extensions;
 using NSBM.ICU.Application.Common.Interfaces;
 using NSBM.ICU.Application.Features.Calendar.Models;
+using NSBM.ICU.Domain.Enums;
 
 namespace NSBM.ICU.Application.Features.Calendar.Commands.UpdateCalendarEvent;
 
@@ -19,7 +21,7 @@ public sealed class UpdateCalendarEventCommandValidator : AbstractValidator<Upda
     }
 }
 
-public sealed class UpdateCalendarEventCommandHandler(IApplicationDbContext db, ICurrentUser currentUser) : IRequestHandler<UpdateCalendarEventCommand>
+public sealed class UpdateCalendarEventCommandHandler(IApplicationDbContext db, ICurrentUser currentUser, IAuditTrail audit) : IRequestHandler<UpdateCalendarEventCommand>
 {
     public async Task Handle(UpdateCalendarEventCommand request, CancellationToken ct)
     {
@@ -29,6 +31,8 @@ public sealed class UpdateCalendarEventCommandHandler(IApplicationDbContext db, 
         await db.EnsureLinksAsync(request.Event, ct);
 
         calendarEvent.Apply(request.Event);
+        await audit.RecordAsync(AuditCategory.Communication, AuditActions.CalendarEventUpdated,
+            $"Updated the calendar event \"{calendarEvent.Title}\"", "CalendarEvent", calendarEvent.Id.ToString(), ct);
         await db.SaveChangesAsync(ct);
     }
 }

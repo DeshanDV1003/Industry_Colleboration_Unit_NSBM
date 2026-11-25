@@ -1,11 +1,13 @@
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using NSBM.ICU.Application.Common.Auditing;
 using NSBM.ICU.Application.Common.Exceptions;
 using NSBM.ICU.Application.Common.Extensions;
 using NSBM.ICU.Application.Common.Interfaces;
 using NSBM.ICU.Application.Features.Venues.Models;
 using NSBM.ICU.Domain.Entities.Venues;
+using NSBM.ICU.Domain.Enums;
 
 namespace NSBM.ICU.Application.Features.Venues.Commands.CreateVenue;
 
@@ -17,7 +19,7 @@ public sealed class CreateVenueCommandValidator : AbstractValidator<CreateVenueC
     public CreateVenueCommandValidator() => RuleFor(x => x.Venue).NotNull().SetValidator(new VenueInputValidator());
 }
 
-public sealed class CreateVenueCommandHandler(IApplicationDbContext db, ICurrentUser currentUser) : IRequestHandler<CreateVenueCommand, int>
+public sealed class CreateVenueCommandHandler(IApplicationDbContext db, ICurrentUser currentUser, IAuditTrail audit) : IRequestHandler<CreateVenueCommand, int>
 {
     public async Task<int> Handle(CreateVenueCommand request, CancellationToken ct)
     {
@@ -29,6 +31,9 @@ public sealed class CreateVenueCommandHandler(IApplicationDbContext db, ICurrent
             throw new BusinessRuleException($"A venue with code {venue.Code} already exists.");
 
         db.Venues.Add(venue);
+        await db.SaveChangesAsync(ct);
+        await audit.RecordAsync(AuditCategory.Halls, AuditActions.VenueCreated, $"Added the venue {venue.DisplayName} ({venue.Capacity} seats)",
+            "Venue", venue.Id.ToString(), ct);
         await db.SaveChangesAsync(ct);
         return venue.Id;
     }

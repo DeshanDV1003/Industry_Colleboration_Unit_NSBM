@@ -1,10 +1,12 @@
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using NSBM.ICU.Application.Common.Auditing;
 using NSBM.ICU.Application.Common.Exceptions;
 using NSBM.ICU.Application.Common.Extensions;
 using NSBM.ICU.Application.Common.Interfaces;
 using NSBM.ICU.Application.Features.Venues.Models;
+using NSBM.ICU.Domain.Enums;
 
 namespace NSBM.ICU.Application.Features.Venues.Commands.UpdateVenue;
 
@@ -19,7 +21,7 @@ public sealed class UpdateVenueCommandValidator : AbstractValidator<UpdateVenueC
     public UpdateVenueCommandValidator() => RuleFor(x => x.Venue).NotNull().SetValidator(new VenueInputValidator());
 }
 
-public sealed class UpdateVenueCommandHandler(IApplicationDbContext db, ICurrentUser currentUser, IDateTime clock) : IRequestHandler<UpdateVenueCommand>
+public sealed class UpdateVenueCommandHandler(IApplicationDbContext db, ICurrentUser currentUser, IDateTime clock, IAuditTrail audit) : IRequestHandler<UpdateVenueCommand>
 {
     public async Task Handle(UpdateVenueCommand request, CancellationToken ct)
     {
@@ -37,6 +39,8 @@ public sealed class UpdateVenueCommandHandler(IApplicationDbContext db, ICurrent
             throw new BusinessRuleException($"An upcoming booking expects {largestUpcoming} people. Move it before lowering the capacity.");
 
         venue.Apply(request.Venue);
+        await audit.RecordAsync(AuditCategory.Halls, AuditActions.VenueUpdated,
+            $"Updated the venue {venue.DisplayName} ({venue.Capacity} seats, {(venue.IsActive ? "open" : "closed")})", "Venue", venue.Id.ToString(), ct);
         await db.SaveChangesAsync(ct);
     }
 }

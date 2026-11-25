@@ -222,7 +222,7 @@ Logo files live in `web/public/brand/`.
 | Student   | Dashboard, Career pathways, Skills baseline, Roadmap, Readiness & gaps, Task library, Task workbench, Knowledge check, Team simulation, Mentor center, Portfolio, Interview prep (soft skills), Technical interview, Interview report, CV studio, Career center (internships), Applications, Planner |
 | Lecturer  | Student directory, Student insights, Task assignment, Support signals, Feedback notes, Interview review, Research analytics |
 | Industry  | Industry challenges, Task skills, Vacancies (industry hub), Applications review, Shortlist/invite, Candidate review, Mentor replies |
-| Admin     | Task approval, Vacancy approval, Research overview, Settings / demo reset, Users (create/edit any role, deactivate, reset passwords, CSV student import), Announcements to everyone or one group, Hall allocations (read-only) |
+| Admin     | Task approval, Vacancy approval, Research overview, Settings / demo reset, Users (create/edit any role, deactivate, reset passwords, CSV student import), Reports, Audit log, Announcements to everyone or one group, Hall allocations (read-only) |
 | Assistant Registrar | Venues (halls, labs, auditoriums, event halls), Hall allocations: lecture halls to cohorts (weekly repeats) and halls to partner or Unit events, with capacity, teaching-hours, hall and cohort clash checks |
 
 ### Build milestones
@@ -246,6 +246,7 @@ Logo files live in `web/public/brand/`.
 | 15 | Assistant Registrar portal: venues, hall allocation for lectures (cohort = programme + year) and events, clash and capacity rules (`VenueBookingRules`), everyone affected notified (cohort, registered students, host company, admins); students see their halls on the calendar; admin announcements to everyone or one group — **done** |
 | 16 | User management: admin creates and edits accounts for every role (account + role profile saved in one transaction), deactivates/reactivates (open sessions stop at once via a token check; never yourself or the last admin), resets passwords, imports a cohort from CSV with a per-row report; everyone can change their own password; demo reset restores exactly the seeded accounts — **done** |
 | 17 | Reports & exports: hall timetable (admin, registrar), event attendance and internship applications (admin), student participation as counts, never a ranking (admin, lecturers). Each report is one `ReportTable` served as JSON for preview and printing (save as PDF from the print dialog) or as a typed, filterable Excel file (`IReportFileWriter`, ClosedXML) — **done** |
+| 18 | Audit log: `IAuditTrail` records approvals, account changes, password resets (never the password), hall allocations, announcements, calendar changes, partner application decisions, certificates and demo resets in the same save as the change; append-only (no edit/delete endpoint, kept through demo resets); admin page with area, search (incl. account e-mail), date filters, paging and Excel export — **done** |
 
 ## 7. Responsible-use principles (from the guide)
 

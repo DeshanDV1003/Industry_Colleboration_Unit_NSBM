@@ -1,5 +1,6 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using NSBM.ICU.Application.Common.Auditing;
 using NSBM.ICU.Application.Common.Exceptions;
 using NSBM.ICU.Application.Common.Extensions;
 using NSBM.ICU.Application.Common.Interfaces;
@@ -15,7 +16,7 @@ public sealed record ReviewIndustryEventCommand(int Id, ReviewDecision Decision,
 
 public sealed class ReviewIndustryEventCommandValidator : ReviewCommandValidator<ReviewIndustryEventCommand>;
 
-public sealed class ReviewIndustryEventCommandHandler(IApplicationDbContext db, ICurrentUser currentUser, IDateTime clock)
+public sealed class ReviewIndustryEventCommandHandler(IApplicationDbContext db, ICurrentUser currentUser, IDateTime clock, IAuditTrail audit)
     : IRequestHandler<ReviewIndustryEventCommand>
 {
     public async Task Handle(ReviewIndustryEventCommand request, CancellationToken ct)
@@ -45,6 +46,9 @@ public sealed class ReviewIndustryEventCommandHandler(IApplicationDbContext db, 
                 NotificationLinks.Event(industryEvent.Id), clock.UtcNow);
         }
 
+        await audit.RecordAsync(AuditCategory.Moderation, AuditActions.EventReviewed,
+            $"{AuditActions.Verdict(request.Decision)} the partner event \"{industryEvent.Title}\"" + (approved ? "" : $": {request.Note}"),
+            "IndustryEvent", industryEvent.Id.ToString(), ct);
         await db.SaveChangesAsync(ct);
     }
 }

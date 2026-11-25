@@ -1,5 +1,6 @@
 using FluentValidation;
 using MediatR;
+using NSBM.ICU.Application.Common.Auditing;
 using NSBM.ICU.Application.Common.Extensions;
 using NSBM.ICU.Application.Common.Interfaces;
 using NSBM.ICU.Application.Common.Notifications;
@@ -17,7 +18,7 @@ public sealed class CreateCalendarEventCommandValidator : AbstractValidator<Crea
     public CreateCalendarEventCommandValidator() => RuleFor(x => x.Event).NotNull().SetValidator(new CalendarEventInputValidator());
 }
 
-public sealed class CreateCalendarEventCommandHandler(IApplicationDbContext db, ICurrentUser currentUser, IDateTime clock) : IRequestHandler<CreateCalendarEventCommand, int>
+public sealed class CreateCalendarEventCommandHandler(IApplicationDbContext db, ICurrentUser currentUser, IDateTime clock, IAuditTrail audit) : IRequestHandler<CreateCalendarEventCommand, int>
 {
     public async Task<int> Handle(CreateCalendarEventCommand request, CancellationToken ct)
     {
@@ -33,6 +34,9 @@ public sealed class CreateCalendarEventCommandHandler(IApplicationDbContext db, 
             db.Notify(await db.CalendarAudienceUserIdsAsync(calendarEvent, ct), NotificationKind.CalendarEvent,
                 $"New on the calendar: {calendarEvent.Title}", $"Starts {calendarEvent.StartDate:d MMM yyyy}.", NotificationLinks.Calendar, clock.UtcNow);
 
+        await db.SaveChangesAsync(ct);
+        await audit.RecordAsync(AuditCategory.Communication, AuditActions.CalendarEventCreated,
+            $"Added \"{calendarEvent.Title}\" to the calendar ({calendarEvent.StartDate:d MMM yyyy})", "CalendarEvent", calendarEvent.Id.ToString(), ct);
         await db.SaveChangesAsync(ct);
         return calendarEvent.Id;
     }

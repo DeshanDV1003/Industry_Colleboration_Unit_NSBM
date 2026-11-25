@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using NSBM.ICU.Domain.Entities.Auditing;
 using NSBM.ICU.Domain.Entities.Calendar;
 using NSBM.ICU.Domain.Entities.Careers;
 using NSBM.ICU.Domain.Entities.Events;
@@ -84,6 +85,9 @@ public interface IApplicationDbContext
     // Notifications
     DbSet<Notification> Notifications { get; }
     DbSet<Announcement> Announcements { get; }
+
+    // Accountability
+    DbSet<AuditEntry> AuditEntries { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

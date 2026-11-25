@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NSBM.ICU.Application.Common.Interfaces;
+using NSBM.ICU.Domain.Entities.Auditing;
 using NSBM.ICU.Domain.Entities.Calendar;
 using NSBM.ICU.Domain.Entities.Careers;
 using NSBM.ICU.Domain.Entities.Events;
@@ -68,6 +69,7 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
     public DbSet<CalendarEvent> CalendarEvents => Set<CalendarEvent>();
     public DbSet<Notification> Notifications => Set<Notification>();
     public DbSet<Announcement> Announcements => Set<Announcement>();
+    public DbSet<AuditEntry> AuditEntries => Set<AuditEntry>();
     public DbSet<Venue> Venues => Set<Venue>();
     public DbSet<VenueBooking> VenueBookings => Set<VenueBooking>();
     public DbSet<AiInterviewSession> AiInterviewSessions => Set<AiInterviewSession>();

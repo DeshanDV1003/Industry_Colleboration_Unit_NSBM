@@ -1,5 +1,6 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using NSBM.ICU.Application.Common.Auditing;
 using NSBM.ICU.Application.Common.Exceptions;
 using NSBM.ICU.Application.Common.Extensions;
 using NSBM.ICU.Application.Common.Interfaces;
@@ -15,7 +16,7 @@ public sealed record ReviewVacancyCommand(int Id, ReviewDecision Decision, strin
 
 public sealed class ReviewVacancyCommandValidator : ReviewCommandValidator<ReviewVacancyCommand>;
 
-public sealed class ReviewVacancyCommandHandler(IApplicationDbContext db, ICurrentUser currentUser, IDateTime clock)
+public sealed class ReviewVacancyCommandHandler(IApplicationDbContext db, ICurrentUser currentUser, IDateTime clock, IAuditTrail audit)
     : IRequestHandler<ReviewVacancyCommand>
 {
     public async Task Handle(ReviewVacancyCommand request, CancellationToken cancellationToken)
@@ -30,6 +31,9 @@ public sealed class ReviewVacancyCommandHandler(IApplicationDbContext db, ICurre
             approved ? $"Approved: {vacancy.Title}" : $"Changes needed: {vacancy.Title}",
             approved ? "Your vacancy is now live for students." : $"The Unit asked for changes: {request.Note}",
             NotificationLinks.PartnerVacancies, clock.UtcNow);
+        await audit.RecordAsync(AuditCategory.Moderation, AuditActions.VacancyReviewed,
+            $"{AuditActions.Verdict(request.Decision)} the vacancy \"{vacancy.Title}\"" + (approved ? "" : $": {request.Note}"),
+            "Vacancy", vacancy.Id.ToString(), cancellationToken);
         await db.SaveChangesAsync(cancellationToken);
     }
 }

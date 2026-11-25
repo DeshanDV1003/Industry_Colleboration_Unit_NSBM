@@ -1,6 +1,7 @@
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using NSBM.ICU.Application.Common.Auditing;
 using NSBM.ICU.Application.Common.Exceptions;
 using NSBM.ICU.Application.Common.Extensions;
 using NSBM.ICU.Application.Common.Interfaces;
@@ -22,7 +23,7 @@ public sealed class CreateVenueBookingCommandValidator : AbstractValidator<Creat
     public CreateVenueBookingCommandValidator() => RuleFor(x => x.Booking).NotNull().SetValidator(new VenueBookingInputValidator());
 }
 
-public sealed class CreateVenueBookingCommandHandler(IApplicationDbContext db, ICurrentUser currentUser, IDateTime clock)
+public sealed class CreateVenueBookingCommandHandler(IApplicationDbContext db, ICurrentUser currentUser, IDateTime clock, IAuditTrail audit)
     : IRequestHandler<CreateVenueBookingCommand, IReadOnlyList<int>>
 {
     private sealed record Subject(string Title, int Attendees, DateOnly? From = null, DateOnly? To = null);
@@ -66,6 +67,8 @@ public sealed class CreateVenueBookingCommandHandler(IApplicationDbContext db, I
         var repeat = bookings.Count > 1 ? $" Repeats weekly for {bookings.Count} weeks." : string.Empty;
         db.NotifyAll(await db.ForAsync(first, currentUser.UserId, ct), NotificationKind.HallAssigned,
             $"Hall assigned: {first.Title}", $"{venue.DisplayName} ({venue.Building}), {when}.{repeat}", clock.UtcNow);
+        await audit.RecordAsync(AuditCategory.Halls, AuditActions.HallAllocated, $"Allocated {venue.DisplayName} for {first.Title}, {when}.{repeat}",
+            "Venue", venue.Id.ToString(), ct);
 
         await db.SaveChangesAsync(ct);
         return bookings.Select(b => b.Id).ToList();

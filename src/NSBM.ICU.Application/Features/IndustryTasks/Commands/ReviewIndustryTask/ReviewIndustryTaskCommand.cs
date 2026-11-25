@@ -1,5 +1,6 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using NSBM.ICU.Application.Common.Auditing;
 using NSBM.ICU.Application.Common.Exceptions;
 using NSBM.ICU.Application.Common.Extensions;
 using NSBM.ICU.Application.Common.Interfaces;
@@ -15,7 +16,7 @@ public sealed record ReviewIndustryTaskCommand(int Id, ReviewDecision Decision, 
 
 public sealed class ReviewIndustryTaskCommandValidator : ReviewCommandValidator<ReviewIndustryTaskCommand>;
 
-public sealed class ReviewIndustryTaskCommandHandler(IApplicationDbContext db, ICurrentUser currentUser, IDateTime clock)
+public sealed class ReviewIndustryTaskCommandHandler(IApplicationDbContext db, ICurrentUser currentUser, IDateTime clock, IAuditTrail audit)
     : IRequestHandler<ReviewIndustryTaskCommand>
 {
     public async Task Handle(ReviewIndustryTaskCommand request, CancellationToken cancellationToken)
@@ -30,6 +31,9 @@ public sealed class ReviewIndustryTaskCommandHandler(IApplicationDbContext db, I
             approved ? $"Approved: {task.Title}" : $"Changes needed: {task.Title}",
             approved ? "Your industry task is now live for students." : $"The Unit asked for changes: {request.Note}",
             NotificationLinks.PartnerTasks, clock.UtcNow);
+        await audit.RecordAsync(AuditCategory.Moderation, AuditActions.TaskReviewed,
+            $"{AuditActions.Verdict(request.Decision)} the industry task \"{task.Title}\"" + (approved ? "" : $": {request.Note}"),
+            "Task", task.Id.ToString(), cancellationToken);
         await db.SaveChangesAsync(cancellationToken);
     }
 }

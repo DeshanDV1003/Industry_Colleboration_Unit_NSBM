@@ -1,5 +1,6 @@
 using FluentValidation;
 using MediatR;
+using NSBM.ICU.Application.Common.Auditing;
 using NSBM.ICU.Application.Common.Exceptions;
 using NSBM.ICU.Application.Common.Interfaces;
 using NSBM.ICU.Application.Common.Models;
@@ -7,6 +8,7 @@ using NSBM.ICU.Application.Common.Validation;
 using NSBM.ICU.Application.Features.Users.Dtos;
 using NSBM.ICU.Application.Features.Users.Models;
 using NSBM.ICU.Domain.Constants;
+using NSBM.ICU.Domain.Enums;
 
 namespace NSBM.ICU.Application.Features.Users.Commands.ImportStudents;
 
@@ -41,7 +43,7 @@ public sealed class StudentCsvRowValidator : AbstractValidator<StudentCsvRow>
     }
 }
 
-public sealed class ImportStudentsCommandHandler(IApplicationDbContext db, IIdentityService identity)
+public sealed class ImportStudentsCommandHandler(IApplicationDbContext db, IIdentityService identity, IAuditTrail audit)
     : IRequestHandler<ImportStudentsCommand, StudentImportResultDto>
 {
     public const int MaxRows = 500;
@@ -65,6 +67,10 @@ public sealed class ImportStudentsCommandHandler(IApplicationDbContext db, IIden
             else errors.Add(new StudentImportRowError(row.Row, string.IsNullOrWhiteSpace(row.StudentNo) ? null : row.StudentNo, problem));
         }
 
+        await audit.RecordAsync(AuditCategory.Accounts, AuditActions.StudentsImported,
+            $"Imported {created} student account{(created == 1 ? "" : "s")} from CSV ({errors.Count} row{(errors.Count == 1 ? "" : "s")} not imported)",
+            cancellationToken: ct);
+        await db.SaveChangesAsync(ct);
         return new StudentImportResultDto(created, errors);
     }
 

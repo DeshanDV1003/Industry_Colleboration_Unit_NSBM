@@ -1,5 +1,6 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using NSBM.ICU.Application.Common.Auditing;
 using NSBM.ICU.Application.Common.Exceptions;
 using NSBM.ICU.Application.Common.Extensions;
 using NSBM.ICU.Application.Common.Interfaces;
@@ -15,7 +16,7 @@ namespace NSBM.ICU.Application.Features.IndustryEvents.Commands.IssueCertificate
 /// </summary>
 public sealed record IssueCertificatesCommand(int EventId) : IRequest<int>;
 
-public sealed class IssueCertificatesCommandHandler(IApplicationDbContext db, ICurrentUser currentUser, IDateTime clock)
+public sealed class IssueCertificatesCommandHandler(IApplicationDbContext db, ICurrentUser currentUser, IDateTime clock, IAuditTrail audit)
     : IRequestHandler<IssueCertificatesCommand, int>
 {
     public async Task<int> Handle(IssueCertificatesCommand request, CancellationToken ct)
@@ -40,6 +41,8 @@ public sealed class IssueCertificatesCommandHandler(IApplicationDbContext db, IC
         var userIds = await db.Students.Where(s => issuedTo.Contains(s.Id)).Select(s => s.UserId).ToListAsync(ct);
         db.Notify(userIds, NotificationKind.CertificateIssued, $"Certificate issued: {industryEvent.Title}",
             "Your participation certificate is ready to view and share.", NotificationLinks.Certificates, now);
+        await audit.RecordAsync(AuditCategory.Applications, AuditActions.CertificatesIssued,
+            $"Issued {issuedTo.Count} certificate{(issuedTo.Count == 1 ? "" : "s")} for \"{industryEvent.Title}\"", "IndustryEvent", industryEvent.Id.ToString(), ct);
 
         await db.SaveChangesAsync(ct);
         return issuedTo.Count;

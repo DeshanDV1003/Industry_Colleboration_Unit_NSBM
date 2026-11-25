@@ -12,6 +12,7 @@ import datetime
 import json
 import sys
 import urllib.error
+import urllib.parse
 import urllib.request
 
 API = "http://localhost:5300/api/v1"
@@ -150,6 +151,7 @@ READS = {
     "/reports/event-attendance": {"Admin"},
     f"/reports/applications?from={(TODAY - datetime.timedelta(days=90)).isoformat()}&to={TODAY.isoformat()}": {"Admin"},
     "/reports/student-participation": {"Admin", "Lecturer"},
+    "/audit": {"Admin"},
 }
 for path, allowed in READS.items():
     for role, token in ROLE_TOKENS.items():
@@ -808,9 +810,57 @@ check("student's own counts", sahan[8] >= 1 and sahan[11] >= 1, sahan)
 check("participation filter", all(r[2] == "BSc (Hons) Computer Science" for r in call("GET", "/reports/student-participation?programme=BSc%20(Hons)%20Computer%20Science", adm)[1]["rows"]))
 expect("partner cannot download reports", call("GET", "/reports/student-participation?format=xlsx", lanka), 403)
 
+# ---------------------------------------------------------------- M18 audit log
+section("M18 Audit log")
+# Everything above ran through the API, so the log already holds the actions of this run.
+log = expect("audit log", call("GET", "/audit", adm), 200)
+check("paged, newest first", log["pageSize"] == 50 and log["total"] >= len(log["items"]) > 0
+      and [e["at"] for e in log["items"]] == sorted((e["at"] for e in log["items"]), reverse=True), log["total"])
+
+def audited(**filters):
+    query = "&".join(f"{k}={urllib.parse.quote(str(v))}" for k, v in filters.items())
+    return call("GET", f"/audit?{query}", adm)[1]["items"]
+
+def has(items, action, *words):
+    return any(e["action"] == action and all(w in e["summary"] for w in words) for e in items)
+
+accounts = audited(category="Accounts", search=run)
+check("account creation recorded with role and e-mail", has(accounts, "user.created", "Student", f"new.student{run}@nsbm.demo"), accounts[:3])
+check("deactivation recorded", has(accounts, "user.deactivated", "Nimal"))
+check("password reset recorded", has(audited(category="Accounts", search="password"), "user.password-reset", "Nimali Perera"))
+check("own password change recorded by the person themself", any(e["action"] == "user.password-changed" and e["actorName"] == "Nimali Perera"
+      for e in audited(category="Accounts", search="own password")))
+check("CSV import recorded with counts", has(audited(search="Imported"), "user.students-imported", "2 student accounts", "4 rows not imported"))
+check("no password ever written to the log", not audited(search="Welcome123") and not audited(search="Temporary9") and not audited(search="MyOwnPass7"))
+
+halls = audited(category="Halls")
+check("hall allocation recorded by the registrar", any(e["action"] == "hall.allocated" and e["actorRole"] == "Registrar" and "Regression lecture" in e["summary"] for e in halls))
+check("hall cancellation recorded", has(halls, "hall.cancelled", "Regression lecture"))
+check("venue changes recorded", has(halls, "venue.created", "LH-901") and has(halls, "venue.updated", "closed"))
+check("announcement recorded with its audience", has(audited(category="Communication"), "announcement.sent", "Campus closed on Friday", "Everyone"))
+check("calendar changes recorded", has(audited(category="Communication"), "calendar.deleted", "Regression career talk"))
+moderation = audited(category="Moderation")
+check("moderation decisions recorded with the verdict", any(e["action"] in ("task.reviewed", "vacancy.reviewed", "event.reviewed") for e in moderation)
+      and any(e["summary"].startswith(("Approved", "Returned for changes")) for e in moderation), moderation[:3])
+check("badge reviews recorded by the lecturer", any(e["action"] == "badge.reviewed" and e["actorRole"] == "Lecturer" for e in moderation))
+check("partner decisions on applications recorded", any(e["action"] == "application.status-changed" and e["actorRole"] == "Industry"
+      for e in audited(category="Applications")))
+check("demo reset recorded", has(audited(category="Platform"), "platform.demo-reset"))
+check("date filter", all(e["at"][:10] == TODAY.isoformat() for e in audited(**{"from": TODAY.isoformat(), "to": TODAY.isoformat()})))
+check("future range is empty", audited(**{"from": (TODAY + datetime.timedelta(days=1)).isoformat()}) == [])
+expect("dates out of order", call("GET", f"/audit?from={TODAY.isoformat()}&to={(TODAY - datetime.timedelta(days=1)).isoformat()}", adm), 400)
+page2 = call("GET", "/audit?page=2", adm)[1]
+check("second page continues the first", log["total"] <= 50 or (page2["items"] and page2["items"][0]["id"] < log["items"][-1]["id"]))
+expect("page must be positive", call("GET", "/audit?page=0", adm), 400)
+
+status, ctype, disposition, content = download(f"/audit/export?category=Halls", adm)
+check("audit export is a real workbook", status == 200 and "audit-log-" in disposition and is_xlsx(content, "Audit log", "What happened", "hall.allocated"), disposition)
+expect("registrar cannot read the audit log", call("GET", "/audit/export", reg), 403)
+
 # ---------------------------------------------------------------- restore
 section("Restore")
 expect("final demo reset", call("POST", "/settings/demo-reset", adm), 204)
+check("demo reset keeps the audit log", call("GET", "/audit", adm)[1]["total"] > log["total"])
 after_reset = call("GET", "/users", adm)[1]
 check("reset leaves only the seeded, active accounts", len(after_reset) == 11 and all(u["isActive"] for u in after_reset), [u["email"] for u in after_reset])
 

@@ -1,6 +1,7 @@
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using NSBM.ICU.Application.Common.Auditing;
 using NSBM.ICU.Application.Common.Extensions;
 using NSBM.ICU.Application.Common.Interfaces;
 using NSBM.ICU.Application.Common.Notifications;
@@ -24,7 +25,7 @@ public sealed class SendAnnouncementCommandValidator : AbstractValidator<SendAnn
     }
 }
 
-public sealed class SendAnnouncementCommandHandler(IApplicationDbContext db, ICurrentUser currentUser, IDateTime clock)
+public sealed class SendAnnouncementCommandHandler(IApplicationDbContext db, ICurrentUser currentUser, IDateTime clock, IAuditTrail audit)
     : IRequestHandler<SendAnnouncementCommand, int>
 {
     public async Task<int> Handle(SendAnnouncementCommand request, CancellationToken ct)
@@ -44,6 +45,8 @@ public sealed class SendAnnouncementCommandHandler(IApplicationDbContext db, ICu
         db.Announcements.Add(announcement);
         db.Notify(recipients, NotificationKind.Announcement, announcement.Title, announcement.Message, NotificationLinks.Notifications, clock.UtcNow);
 
+        await audit.RecordAsync(AuditCategory.Communication, AuditActions.AnnouncementSent,
+            $"Sent \"{announcement.Title}\" to {request.Audience} ({recipients.Count} people)", cancellationToken: ct);
         await db.SaveChangesAsync(ct);
         return announcement.Id;
     }

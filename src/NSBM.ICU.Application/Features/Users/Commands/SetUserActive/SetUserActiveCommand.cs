@@ -1,7 +1,9 @@
 using MediatR;
+using NSBM.ICU.Application.Common.Auditing;
 using NSBM.ICU.Application.Common.Exceptions;
 using NSBM.ICU.Application.Common.Interfaces;
 using NSBM.ICU.Domain.Constants;
+using NSBM.ICU.Domain.Enums;
 
 namespace NSBM.ICU.Application.Features.Users.Commands.SetUserActive;
 
@@ -11,7 +13,7 @@ namespace NSBM.ICU.Application.Features.Users.Commands.SetUserActive;
 /// </summary>
 public sealed record SetUserActiveCommand(string UserId, bool IsActive) : IRequest;
 
-public sealed class SetUserActiveCommandHandler(IIdentityService identity, ICurrentUser currentUser) : IRequestHandler<SetUserActiveCommand>
+public sealed class SetUserActiveCommandHandler(IApplicationDbContext db, IIdentityService identity, ICurrentUser currentUser, IAuditTrail audit) : IRequestHandler<SetUserActiveCommand>
 {
     public async Task Handle(SetUserActiveCommand request, CancellationToken ct)
     {
@@ -27,6 +29,10 @@ public sealed class SetUserActiveCommandHandler(IIdentityService identity, ICurr
                 throw new BusinessRuleException("The Unit must keep at least one active admin.");
         }
 
+        var name = (await db.RequireAsync(request.UserId, ct)).FullName;
+        await audit.RecordAsync(AuditCategory.Accounts, request.IsActive ? AuditActions.UserReactivated : AuditActions.UserDeactivated,
+            $"{(request.IsActive ? "Reactivated" : "Deactivated")} {name} ({account.Role})", "User", account.Email, ct);
         await identity.SetActiveAsync(request.UserId, request.IsActive, ct);
+        await db.SaveChangesAsync(ct);
     }
 }

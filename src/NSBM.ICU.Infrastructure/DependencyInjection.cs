@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using NSBM.ICU.Application.Common.Auditing;
 using NSBM.ICU.Application.Common.Interfaces;
 using NSBM.ICU.Infrastructure.Ai;
 using NSBM.ICU.Infrastructure.Identity;
@@ -59,6 +60,7 @@ public static class DependencyInjection
         services.AddScoped<VenueSeeder>();
         services.AddScoped<DatabaseSeeder>();
         services.AddScoped<IDemoDataService, DemoDataService>();
+        services.AddScoped<IAuditTrail, AuditTrail>();
     }
 
     private static void AddIdentityServices(this IServiceCollection services, IConfiguration configuration)

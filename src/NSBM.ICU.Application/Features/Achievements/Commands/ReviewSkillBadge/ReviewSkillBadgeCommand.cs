@@ -1,5 +1,6 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using NSBM.ICU.Application.Common.Auditing;
 using NSBM.ICU.Application.Common.Exceptions;
 using NSBM.ICU.Application.Common.Extensions;
 using NSBM.ICU.Application.Common.Interfaces;
@@ -16,7 +17,7 @@ public sealed record ReviewSkillBadgeCommand(int Id, ReviewDecision Decision, st
 
 public sealed class ReviewSkillBadgeCommandValidator : ReviewCommandValidator<ReviewSkillBadgeCommand>;
 
-public sealed class ReviewSkillBadgeCommandHandler(IApplicationDbContext db, ICurrentUser currentUser, IDateTime clock)
+public sealed class ReviewSkillBadgeCommandHandler(IApplicationDbContext db, ICurrentUser currentUser, IDateTime clock, IAuditTrail audit)
     : IRequestHandler<ReviewSkillBadgeCommand>
 {
     public async Task Handle(ReviewSkillBadgeCommand request, CancellationToken ct)
@@ -43,6 +44,9 @@ public sealed class ReviewSkillBadgeCommandHandler(IApplicationDbContext db, ICu
             approved ? $"Badge earned: {badge.Skill!.Name}" : $"Badge not yet: {badge.Skill!.Name}",
             approved ? $"{lecturer.FullName} approved your badge. It is now on your profile card." : $"{lecturer.FullName}: {request.Note}",
             NotificationLinks.Achievements, now);
+        var student = await db.Students.Where(s => s.Id == badge.StudentId).Select(s => s.FirstName + " " + s.LastName).SingleAsync(ct);
+        await audit.RecordAsync(AuditCategory.Moderation, AuditActions.BadgeReviewed,
+            $"{(approved ? "Approved" : "Declined")} the {badge.Skill.Name} badge for {student}", "SkillBadge", badge.Id.ToString(), ct);
         await db.SaveChangesAsync(ct);
     }
 }

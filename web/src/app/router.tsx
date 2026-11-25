@@ -55,6 +55,7 @@ const SettingsPage = lazy(() => import('@/features/settings/pages/SettingsPage')
 const HallBookingsPage = lazy(() => import('@/features/venues/pages/HallBookingsPage'))
 const VenuesPage = lazy(() => import('@/features/venues/pages/VenuesPage'))
 const ReportsPage = lazy(() => import('@/features/reports/pages/ReportsPage'))
+const AuditLogPage = lazy(() => import('@/features/audit/pages/AuditLogPage'))
 const UsersPage = lazy(() => import('@/features/users/pages/UsersPage'))
 const AnnouncementsPage = lazy(() => import('@/features/announcements/pages/AnnouncementsPage'))
 
@@ -182,6 +183,7 @@ export const router = createBrowserRouter([
               { path: '/partner-enquiries', element: <PartnerEnquiriesPage /> },
               { path: '/announcements', element: <AnnouncementsPage /> },
               { path: '/users', element: <UsersPage /> },
+              { path: '/audit', element: <AuditLogPage /> },
               { path: '/settings', element: <SettingsPage /> },
             ],
           },

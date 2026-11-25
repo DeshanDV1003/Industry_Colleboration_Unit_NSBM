@@ -1,10 +1,12 @@
 using FluentValidation;
 using MediatR;
+using NSBM.ICU.Application.Common.Auditing;
 using NSBM.ICU.Application.Common.Interfaces;
 using NSBM.ICU.Application.Common.Models;
 using NSBM.ICU.Application.Common.Validation;
 using NSBM.ICU.Application.Features.Users.Models;
 using NSBM.ICU.Domain.Constants;
+using NSBM.ICU.Domain.Enums;
 
 namespace NSBM.ICU.Application.Features.Users.Commands.CreateUser;
 
@@ -23,7 +25,7 @@ public sealed class CreateUserCommandValidator : AbstractValidator<CreateUserCom
     }
 }
 
-public sealed class CreateUserCommandHandler(IApplicationDbContext db, IIdentityService identity)
+public sealed class CreateUserCommandHandler(IApplicationDbContext db, IIdentityService identity, IAuditTrail audit)
     : IRequestHandler<CreateUserCommand, string>
 {
     public async Task<string> Handle(CreateUserCommand request, CancellationToken ct)
@@ -33,6 +35,9 @@ public sealed class CreateUserCommandHandler(IApplicationDbContext db, IIdentity
         await db.EnsureValidAsync(profile, ct);
 
         var account = new NewAccount(request.Role, request.Email.Trim().ToLowerInvariant(), profile.FirstName, profile.LastName, request.Password);
+        // Added before the account is created, so it commits in the same transaction (and not at all if creation fails).
+        await audit.RecordAsync(AuditCategory.Accounts, AuditActions.UserCreated,
+            $"Created a {request.Role} account for {profile.FullName} ({account.Email})", "User", account.Email, ct);
         return await identity.CreateAccountAsync(account, profile, ct);
     }
 }

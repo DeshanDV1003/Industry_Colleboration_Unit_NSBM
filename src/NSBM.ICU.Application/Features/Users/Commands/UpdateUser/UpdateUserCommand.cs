@@ -1,9 +1,11 @@
 using FluentValidation;
 using MediatR;
+using NSBM.ICU.Application.Common.Auditing;
 using NSBM.ICU.Application.Common.Exceptions;
 using NSBM.ICU.Application.Common.Interfaces;
 using NSBM.ICU.Application.Features.Users.Models;
 using NSBM.ICU.Domain.Constants;
+using NSBM.ICU.Domain.Enums;
 
 namespace NSBM.ICU.Application.Features.Users.Commands.UpdateUser;
 
@@ -23,7 +25,7 @@ public sealed class UpdateUserCommandValidator : AbstractValidator<UpdateUserCom
     }
 }
 
-public sealed class UpdateUserCommandHandler(IApplicationDbContext db, IIdentityService identity) : IRequestHandler<UpdateUserCommand>
+public sealed class UpdateUserCommandHandler(IApplicationDbContext db, IIdentityService identity, IAuditTrail audit) : IRequestHandler<UpdateUserCommand>
 {
     public async Task Handle(UpdateUserCommand request, CancellationToken ct)
     {
@@ -37,6 +39,8 @@ public sealed class UpdateUserCommandHandler(IApplicationDbContext db, IIdentity
         UserProfiles.Apply(profile, request.Profile);
         await db.EnsureValidAsync(profile, ct);
 
+        await audit.RecordAsync(AuditCategory.Accounts, AuditActions.UserUpdated,
+            $"Updated the account of {profile.FullName} ({account.Role})", "User", account.Email, ct);
         await db.SaveChangesAsync(ct);
         await identity.RenameAsync(request.UserId, profile.FirstName, profile.LastName, ct);
     }

@@ -1,5 +1,5 @@
 import {
-  Award, BadgeCheck, FileBarChart, Building2, CalendarClock, Megaphone, BarChart3, Bot, Inbox, Trophy, CalendarDays, CalendarHeart, BookOpenCheck, Briefcase, CalendarCheck, ClipboardCheck, Compass, FileText, FolderKanban,
+  Award, BadgeCheck, FileBarChart, ScrollText, Building2, CalendarClock, Megaphone, BarChart3, Bot, Inbox, Trophy, CalendarDays, CalendarHeart, BookOpenCheck, Briefcase, CalendarCheck, ClipboardCheck, Compass, FileText, FolderKanban,
   Gauge, LayoutDashboard, ListChecks, Map, MessagesSquare, Mic, NotebookPen, Settings, ShieldCheck, Target,
   UserCog, UserSearch, Users, Wrench, type LucideIcon,
 } from 'lucide-react'
@@ -111,6 +111,7 @@ export const NAVIGATION: Record<Role, NavSection[]> = {
         { label: 'Hall allocations', to: '/hall-bookings', icon: CalendarClock, ready: true },
         { label: 'Partner enquiries', to: '/partner-enquiries', icon: Inbox, ready: true },
         reports,
+        { label: 'Audit log', to: '/audit', icon: ScrollText, ready: true },
         { label: 'Research overview', to: '/research', icon: BarChart3, ready: true },
         { label: 'Settings', to: '/settings', icon: Settings, ready: true },
       ],
